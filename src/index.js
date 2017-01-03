@@ -5,10 +5,14 @@ import Botkit from 'botkit'
 import config from './config/config.js'
 
 pg.defaults.ssl = true
-const client = new pg.Client(config('DATABASE_URL'))
-client.connect((err) => {
+const client = new pg.Client(config('DATABASE_URL')).connect((err) => {
   if (err) throw err
   else console.log('** Connected to postgres! Getting schemas...')
+})
+
+client.query('SELECT table_schema,table_name FROM information_schema.tables;')
+.on('row', (row) => {
+  console.log(util.inspect(row))
 })
 
 function runQuery (query, args, callback) {
@@ -108,7 +112,7 @@ controller.hears('create', ['direct_message', 'direct_mention'], (bot, message) 
 
 // Handler for query test
 controller.hears('show', ['direct_message', 'direct_mention'], (bot, message) => {
-  let query = `SELECT salesforcesandbox,Case FROM information_schema.tables;`
+  let query = `SELECT salesforcesandbox,case FROM information_schema.tables;`
 
   client.query(query, (err, result) => {
     if (err) console.log(err)
