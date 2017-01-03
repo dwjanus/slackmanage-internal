@@ -4,18 +4,19 @@ import pg from 'pg'
 import Botkit from 'botkit'
 import config from './config/config.js'
 
-let client
-pg.defaults.ssl = true
-pg.connect(config('DATABASE_URL'), (err, res) => {
-  if (err) throw err
-  console.log('** Connected to postgres! Getting schemas...')
-  client = res
-  client
-    .query('SELECT table_schema, table_name FROM information_schema.tables;')
-    .on('row', (row) => {
-      console.log(util.inspect(row))
-    })
-})
+function runQuery (query, args, callback) {
+  pg.defaults.ssl = true
+  pg.connect(config('DATABASE_URL'), (err, client) => {
+    if (err) {
+      throw err
+    } else {
+      console.log('** Connected to postgres! Getting schemas...')
+      client.query(query, args, (err, result) => {
+        callback(err, result)
+      })
+    }
+  })
+}
 
 const port = process.env.PORT || process.env.port || config('PORT')
 
@@ -95,13 +96,13 @@ controller.hears('case', ['direct_message', 'direct_mention'], (bot, message) =>
     let description = `${res.user.profile.real_name} ~ ${message.user}`
     console.log(`pre-query info: ${subject} -- ${creator} -- ${description}`)
 
-    client
-      .query(`INSERT INTO case(subject, creatorname, description, recordtypeid) values(${subject}, ${creator}, ${description}, '01239000000N2AGAA0');`)
-      .on('end', (err, result) => {
-        if (err) console.log(err)
-        console.log(util.inspect(result))
-      })
+    let query = `insert into Case(Subject, CreatorName, Description, RecordTypeId) values($1, $2, $3, $4);`
+    let args = [subject, creator, description, '01239000000N2AGAA0']
 
+    runQuery(query, args, (err, result) => {
+      if (err) console.log(err)
+      else console.log(util.inspect(result))
+    })
     bot.say('Hello I hear you!')
   })
 })
