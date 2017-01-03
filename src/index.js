@@ -87,7 +87,7 @@ controller.hears('^stop', 'direct_message', (bot, message) => {
 // ~ ~ * ~ ~ ~ * * ~ ~ ~ ~ * * * ~ ~ ~ ~ ~ * * * ~ ~ ~ ~ * * ~ ~ ~ * * ~ ~ ~ * * ~ ~ ~ * ~ ~ ~ * ~ ~ * ~ ~ //
 
 // Handler for case creation
-controller.hears('case', ['direct_message', 'direct_mention'], (bot, message) => {
+controller.hears('create', ['direct_message', 'direct_mention'], (bot, message) => {
   bot.api.users.info({user: message.user}, (err, res) => {
     if (err) console.log(err)
     let subject = message.text
@@ -103,6 +103,17 @@ controller.hears('case', ['direct_message', 'direct_mention'], (bot, message) =>
       else console.log(util.inspect(result))
     })
     bot.say('Hello I hear you!')
+  })
+})
+
+// Handler for query test
+controller.hears('show', ['direct_message', 'direct_mention'], (bot, message) => {
+  let query = `SELECT salesforcesandbox,Case FROM Case.tables;`
+
+  client.query(query, (err, result) => {
+    if (err) console.log(err)
+    console.log(util.inspect(result))
+    bot.say('Hello I hear you fo sho!')
   })
 })
 
