@@ -1,0 +1,68 @@
+{
+  "name": "slackmanage-internal",
+  "description": "Samanagebot helps keep you updated on your incidents",
+  "version": "1.0.0",
+  "repository": "https://github.com/dwjanus/slackmanage-internal",
+  "main": "build/index.js",
+  "scripts": {
+    "lint": "eslint source",
+    "clean": "rm -rf build",
+    "postinstall": "npm run compile",
+    "compile": "npm run clean && babel src -d build",
+    "start": "node ./build",
+    "test": "standard"
+  },
+  "author": {
+    "email": "devin.janus@samanage.com",
+    "name": "Devin Janus",
+    "url": "www.samanage.com"
+  },
+  "bugs": {
+    "url": "https://github.com/dwjanus/slackmanage-internal"
+  },
+  "dependencies": {
+    "babel-cli": "^6.16.0",
+    "babel-core": "^6.17.0",
+    "babel-eslint": "^7.0.0",
+    "babel-plugin-transform-async-to-generator": "^6.16.0",
+    "babel-polyfill": "^6.16.0",
+    "babel-preset-es2015": "^6.16.0",
+    "babel-preset-stage-3": "^6.16.0",
+    "babel-runtime": "^6.11.6",
+    "bluebird": "^3.4.6",
+    "body-parser": "^1.15.0",
+    "botkit": "github:howdyai/botkit",
+    "dotenv": "^2.0.0",
+    "eslint": "^3.7.1",
+    "express": "^4.14.0",
+    "express-http-proxy": "^0.6.0",
+    "https": "^1.0.0",
+    "lodash": "^4.6.1",
+    "pg": "6.1.2",
+    "slack": "^6.1.0"
+  },
+  "keywords": [
+    "service cloud",
+    "samanage",
+    "slack",
+    "slack-bot",
+    "bot",
+    "heroku"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": "6.2.2",
+    "npm": "3.10.6"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.16.0",
+    "babel-core": "^6.17.0",
+    "babel-eslint": "^7.0.0",
+    "babel-plugin-transform-async-to-generator": "^6.16.0",
+    "babel-plugin-transform-runtime": "^6.15.0",
+    "babel-polyfill": "^6.16.0",
+    "babel-preset-es2015": "^6.16.0",
+    "babel-preset-stage-3": "^6.16.0",
+    "eslint": "^3.7.1"
+  }
+}
