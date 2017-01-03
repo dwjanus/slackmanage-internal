@@ -87,7 +87,7 @@ controller.hears('^stop', 'direct_message', (bot, message) => {
 // ~ ~ * ~ ~ ~ * * ~ ~ ~ ~ * * * ~ ~ ~ ~ ~ * * * ~ ~ ~ ~ * * ~ ~ ~ * * ~ ~ ~ * * ~ ~ ~ * ~ ~ ~ * ~ ~ * ~ ~ //
 
 // Handler for case creation
-controller.hears('.*', (bot, message) => {
+controller.hears('(.*)', ['direct_message', 'direct_mention'], (bot, message) => {
   bot.api.users.info({user: message.user}, (err, res) => {
     if (err) console.log(err)
     let subject = message.text
@@ -106,17 +106,6 @@ controller.hears('.*', (bot, message) => {
     })
   })
 })
-
-// // Handler for query test
-// controller.hears('show', ['direct_message', 'direct_mention'], (bot, message) => {
-//   let query = `SELECT * FROM salesforcesandbox.case;`
-
-//   client.query(query, (err, result) => {
-//     if (err) console.log(err)
-//     console.log(util.inspect(result))
-//     bot.reply(message, {text: 'Case schema displayed in logs'})
-//   })
-// })
 
 // Handler for interractive message buttons
 controller.on('interactive_message_callback', (bot, message) => {
