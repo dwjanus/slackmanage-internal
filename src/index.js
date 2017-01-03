@@ -98,11 +98,8 @@ controller.hears('(.*)', ['direct_message', 'direct_mention'], (bot, message) =>
 
     runQuery(query, args, (err, result) => {
       if (err) console.log(err)
-      else console.log(util.inspect(result))
-      result.on('row', (row, res) => {
-        console.log('In Row handler: ' + util.inspect(row))
-        bot.reply(message, {text: 'Your ticket has been submitted!'})
-      })
+      console.log(util.inspect(result.row[0]))
+      bot.reply(message, {text: 'Your ticket has been submitted!'})
     })
   })
 })
