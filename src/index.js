@@ -87,13 +87,13 @@ controller.hears('^stop', 'direct_message', (bot, message) => {
 // ~ ~ * ~ ~ ~ * * ~ ~ ~ ~ * * * ~ ~ ~ ~ ~ * * * ~ ~ ~ ~ * * ~ ~ ~ * * ~ ~ ~ * * ~ ~ ~ * ~ ~ ~ * ~ ~ * ~ ~ //
 
 // Handler for case creation
-controller.hears('*', ['direct_message', 'direct_mention'], (bot, message) => {
+controller.hears('\*', ['direct_message', 'direct_mention'], (bot, message) => {
   bot.api.users.info({user: message.user}, (err, res) => {
     if (err) console.log(err)
     let subject = message.text
     let creator = res.user.profile.real_name
     let description = `Automated incident creation via HAL9000 slackbot for: ${res.user.profile.real_name} ~ Slack Id: ${message.user}`
-    let query = 'INSERT INTO salesforcesandbox.case(subject, creatorname, description, recordtypeid) values($1, $2, $3, $4);'
+    let query = 'INSERT INTO salesforcesandbox.case(subject, creatorname, description, recordtypeid) values($1, $2, $3, $4) RETURNING *;'
     let args = [subject, creator, description, '01239000000N2AGAA0']
 
     runQuery(query, args, (err, result) => {
