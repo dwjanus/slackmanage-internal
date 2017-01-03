@@ -41,7 +41,7 @@ controller.setupWebserver(port, (err, webserver) => {
   controller.createWebhookEndpoints(controller.webserver)
 
   webserver.get('/', (req, res) => {
-    res.send('hello')
+    res.send('Whuttr Yu Doin Hur??')
   })
 })
 
@@ -71,7 +71,7 @@ controller.hears(['(^help$)'], ['direct_message', 'direct_mention'], (bot, messa
 
   let replyWithAttachments = {
     pretext: 'Samanage bot help',
-    text: 'Samanage bot automates service through the Samanage Enterprise Service Desk on Service Cloud.',
+    text: 'Samanage bot automates ticket creation for the Samanage Internal Service Desk.',
     attachments,
     mrkdown_in: ['text', 'pretext']
   }
@@ -87,21 +87,22 @@ controller.hears('^stop', 'direct_message', (bot, message) => {
 // ~ ~ * ~ ~ ~ * * ~ ~ ~ ~ * * * ~ ~ ~ ~ ~ * * * ~ ~ ~ ~ * * ~ ~ ~ * * ~ ~ ~ * * ~ ~ ~ * ~ ~ ~ * ~ ~ * ~ ~ //
 
 // Handler for case creation
-controller.hears('create', ['direct_message', 'direct_mention'], (bot, message) => {
+controller.hears('*', ['direct_message', 'direct_mention'], (bot, message) => {
   bot.api.users.info({user: message.user}, (err, res) => {
     if (err) console.log(err)
     let subject = message.text
     let creator = res.user.profile.real_name
-    let description = `${res.user.profile.real_name} ~ ${message.user}`
-    let query = `INSERT INTO salesforcesandbox.case(subject, creatorname, description, recordtypeid) values($1, $2, $3, $4);`
+    let description = `Automated incident creation via HAL9000 slackbot for: ${res.user.profile.real_name} ~ Slack Id: ${message.user}`
+    let query = `INSERT INTO salesforcesandbox.case(subject, creatorname, description, recordtypeid) values($1, $2, $3, $4) RETURNING *;`
     let args = [subject, creator, description, '01239000000N2AGAA0']
-    console.log(`pre-query info: ${subject} -- ${creator} -- ${description}`)
-    console.log(`query:\n${query}\nargs: ${args}`)
 
     runQuery(query, args, (err, result) => {
       if (err) console.log(err)
       else console.log(util.inspect(result))
-      bot.say({text: 'Hello I hear you!'})
+      result.on('row', (row, res) => {
+        console.log('In Row handler: ' + util.inspect(row))
+        bot.reply(message, {text: 'Your ticket has been submitted!'})
+      })
     })
   })
 })
@@ -113,7 +114,7 @@ controller.hears('show', ['direct_message', 'direct_mention'], (bot, message) =>
   client.query(query, (err, result) => {
     if (err) console.log(err)
     console.log(util.inspect(result))
-    bot.say({text: 'Hello I hear you fo sho!'})
+    bot.reply(message, {text: 'Case schema displayed in logs'})
   })
 })
 
