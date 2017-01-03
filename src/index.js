@@ -11,11 +11,6 @@ client.connect((err) => {
   else console.log('** Connected to postgres! Getting schemas...')
 })
 
-client.query('SELECT table_schema,table_name FROM information_schema.tables;')
-.on('row', (row) => {
-  console.log(util.inspect(row))
-})
-
 function runQuery (query, args, callback) {
   client.query(query, args, (err, result) => {
     callback(err, result)
@@ -113,7 +108,7 @@ controller.hears('create', ['direct_message', 'direct_mention'], (bot, message) 
 
 // Handler for query test
 controller.hears('show', ['direct_message', 'direct_mention'], (bot, message) => {
-  let query = `SELECT salesforcesandbox,case FROM information_schema.tables;`
+  let query = `SELECT salesforcesandbox, Case FROM salesforcesandbox.case;`
 
   client.query(query, (err, result) => {
     if (err) console.log(err)
