@@ -96,7 +96,7 @@ controller.hears('case', ['direct_message', 'direct_mention'], (bot, message) =>
     let description = `${res.user.profile.real_name} ~ ${message.user}`
     console.log(`pre-query info: ${subject} -- ${creator} -- ${description}`)
 
-    let query = `insert into Case(Subject, CreatorName, Description, RecordTypeId) values($1, $2, $3, $4);`
+    let query = `insert into case(subject, creatorname, description, recordtypeid) values($1, $2, $3, $4);`
     let args = [subject, creator, description, '01239000000N2AGAA0']
 
     runQuery(query, args, (err, result) => {
