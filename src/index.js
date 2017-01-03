@@ -108,7 +108,7 @@ controller.hears('create', ['direct_message', 'direct_mention'], (bot, message) 
 
 // Handler for query test
 controller.hears('show', ['direct_message', 'direct_mention'], (bot, message) => {
-  let query = `SELECT salesforcesandbox,Case FROM Case.tables;`
+  let query = `SELECT salesforcesandbox,Case FROM information_schema.tables;`
 
   client.query(query, (err, result) => {
     if (err) console.log(err)
