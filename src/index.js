@@ -93,7 +93,7 @@ controller.hears('*', ['direct_message', 'direct_mention'], (bot, message) => {
     let subject = message.text
     let creator = res.user.profile.real_name
     let description = `Automated incident creation via HAL9000 slackbot for: ${res.user.profile.real_name} ~ Slack Id: ${message.user}`
-    let query = `INSERT INTO salesforcesandbox.case(subject, creatorname, description, recordtypeid) values($1, $2, $3, $4) RETURNING *;`
+    let query = 'INSERT INTO salesforcesandbox.case(subject, creatorname, description, recordtypeid) values($1, $2, $3, $4) RETURNING *;'
     let args = [subject, creator, description, '01239000000N2AGAA0']
 
     runQuery(query, args, (err, result) => {
