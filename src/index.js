@@ -5,7 +5,8 @@ import Botkit from 'botkit'
 import config from './config/config.js'
 
 pg.defaults.ssl = true
-const client = new pg.Client(config('DATABASE_URL')).connect((err) => {
+const client = new pg.Client(config('DATABASE_URL'))
+client.connect((err) => {
   if (err) throw err
   else console.log('** Connected to postgres! Getting schemas...')
 })
