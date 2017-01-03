@@ -83,7 +83,7 @@ controller.hears(('*'), ['direct_message', 'direct_mention'], (bot, message) => 
 
     client
       .query('INSERT INTO case(subject, creatorname, description, recordtypeid) values($1, $2, $3, $4)',
-        [subject, creator, description, '01241000000IWNUAA4'])
+        [subject, creator, description, '01239000000N2AGAA0'])
       .on('end', (result) => {
         console.log(util.inspect(result))
       })
