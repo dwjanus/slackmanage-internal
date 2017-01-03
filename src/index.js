@@ -96,8 +96,7 @@ controller.hears('case', ['direct_message', 'direct_mention'], (bot, message) =>
     console.log(`pre-query info: ${subject} -- ${creator} -- ${description}`)
 
     client
-      .query('INSERT INTO case(subject, creatorname, description, recordtypeid) values($1, $2, $3, $4);',
-        [subject, creator, description, '01239000000N2AGAA0'])
+      .query(`INSERT INTO case(subject, creatorname, description, recordtypeid) values(${subject}, ${creator}, ${description}, '01239000000N2AGAA0');`)
       .on('end', (err, result) => {
         if (err) console.log(err)
         console.log(util.inspect(result))
