@@ -34,6 +34,19 @@ controller.spawn({
   if (err) throw new Error(err)
 })
 
+/*************************************************************************************************/
+
+controller.setupWebserver(port, (err, webserver) => {
+  if (err) console.log(err)
+  controller.createWebhookEndpoints(controller.webserver)
+
+  webserver.get('/', (req, res) => {
+    res.send('hello')
+  })
+})
+
+/*************************************************************************************************/
+
 controller.hears(['(^help$)'], ['direct_message', 'direct_mention'], (bot, message) => {
   let attachments = [
     {
@@ -74,7 +87,7 @@ controller.hears('^stop', 'direct_message', (bot, message) => {
 // ~ ~ * ~ ~ ~ * * ~ ~ ~ ~ * * * ~ ~ ~ ~ ~ * * * ~ ~ ~ ~ * * ~ ~ ~ * * ~ ~ ~ * * ~ ~ ~ * ~ ~ ~ * ~ ~ * ~ ~ //
 
 // Handler for case creation
-controller.hears(('*'), ['direct_message', 'direct_mention'], (bot, message) => {
+controller.hears('case', ['direct_message', 'direct_mention'], (bot, message) => {
   bot.api.users.info({user: message.user}, (err, res) => {
     if (err) console.log(err)
     let subject = message.text
