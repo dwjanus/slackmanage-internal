@@ -98,7 +98,7 @@ controller.hears('(.*)', ['direct_message', 'direct_mention'], (bot, message) =>
 
     runQuery(query, args, (err, result) => {
       if (err) console.log(err)
-      console.log(util.inspect(result.row[0]))
+      console.log(util.inspect(result.rows[0]))
       bot.reply(message, {text: 'Your ticket has been submitted!'})
     })
   })
