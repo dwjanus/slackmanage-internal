@@ -93,7 +93,7 @@ controller.hears('create', ['direct_message', 'direct_mention'], (bot, message) 
     let subject = message.text
     let creator = res.user.profile.real_name
     let description = `${res.user.profile.real_name} ~ ${message.user}`
-    let query = `INSERT INTO case(subject, creatorname, description, recordtypeid) values($1, $2, $3, $4);`
+    let query = `INSERT INTO salesforcesandbox.case(subject, creatorname, description, recordtypeid) values($1, $2, $3, $4);`
     let args = [subject, creator, description, '01239000000N2AGAA0']
     console.log(`pre-query info: ${subject} -- ${creator} -- ${description}`)
     console.log(`query:\n${query}\nargs: ${args}`)
@@ -101,8 +101,8 @@ controller.hears('create', ['direct_message', 'direct_mention'], (bot, message) 
     runQuery(query, args, (err, result) => {
       if (err) console.log(err)
       else console.log(util.inspect(result))
+      bot.say({text: 'Hello I hear you!'})
     })
-    bot.say('Hello I hear you!')
   })
 })
 
@@ -113,7 +113,7 @@ controller.hears('show', ['direct_message', 'direct_mention'], (bot, message) =>
   client.query(query, (err, result) => {
     if (err) console.log(err)
     console.log(util.inspect(result))
-    bot.say('Hello I hear you fo sho!')
+    bot.say({text: 'Hello I hear you fo sho!'})
   })
 })
 
