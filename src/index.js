@@ -66,7 +66,7 @@ controller.hears(['(^help$)'], ['direct_message', 'direct_mention'], (bot, messa
         {
           title: 'Example', // maybe make this a gif or jpg?
           value: 'User: @hal: I need help with my keyboard\n' +
-                 'HAL 9000: Your ticket for: \"I need help with my keyboard\"\n' +
+                 'HAL 9000: Your ticket for: \"I need help with my keyboard\" ' +
                  'has been submitted!',
           short: false
         }
