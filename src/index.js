@@ -1,8 +1,14 @@
 
+import http from 'http'
 import util from 'util'
 import pg from 'pg'
 import Botkit from 'botkit'
 import config from './config/config.js'
+
+// Simple hack to ping server every 5min and keep app running
+setInterval(() => {
+  http.get('http://slackmanage-internal.herokuapp.com')
+}, 300000)
 
 pg.defaults.ssl = true
 const client = new pg.Client(config('DATABASE_URL'))
@@ -52,16 +58,16 @@ controller.hears(['(^help$)'], ['direct_message', 'direct_mention'], (bot, messa
     {
       title: 'Usage',
       color: '#0067B3',
-      text: 'Simply direct mention (@samanage)\n' +
-            'in any channel you have invited the bot to, or send a direct message\n' +
-            'to "Samanage for Service Cloud" to begin.\n\n',
+      text: 'Simply direct mention (@hal) in any channel you have invited ' +
+            'the bot to, or send a direct message to: HAL 9000. Any message ' +
+            'sent to Hal will automatically be submitted as an internal ticket ' +
+            'with the entire message body as the case subject.',
       fields: [
         {
           title: 'Example', // maybe make this a gif or jpg?
-          value: 'Jamie: @samanage: hello\n' +
-                 'Samanage bot: H e l l o  Jamie !\n' +
-                 'Jamie: @samanage: I am having trouble processing a new hire\n' +
-                 'Samanage bot: I have made a ticket for you\n',
+          value: 'User: @hal: I need help with my keyboard\n' +
+                 'HAL 9000: Your ticket for: \"I need help with my keyboard\"\n' +
+                 'has been submitted!',
           short: false
         }
       ],
@@ -99,7 +105,7 @@ controller.hears('(.*)', ['direct_message', 'direct_mention'], (bot, message) =>
     runQuery(query, args, (err, result) => {
       if (err) console.log(err)
       console.log(util.inspect(result.rows[0]))
-      bot.reply(message, {text: 'Your ticket has been submitted!'})
+      bot.reply(message, {text: `Your ticket for: "${subject}" has been submitted!`})
     })
   })
 })
