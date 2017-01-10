@@ -107,13 +107,16 @@ controller.hears('(.*)', ['direct_message', 'direct_mention'], (bot, message) =>
 
     runQuery(createQuery, args, (err, result) => {
       if (err) console.log(err)
-      console.log('Result:\n' + util.inspect(result.rows[0]))
+      console.log('Result:\n' + util.inspect(result))
+      console.log('Result rows:\n' + util.inspect(result.rows))
       runQuery(responseQuery, [], (err, secondResult) => {
         if (err) console.log(err)
-        console.log('Second Result:\n' + util.inspect(secondResult.rows[0]))
+        console.log('Second Result:\n' + util.inspect(secondResult))
+        console.log('Second Result rows:\n' + util.inspect(secondResult.rows))
+        console.log('Second Result rows[0]:\n' + util.inspect(secondResult.rows[0]))
         bot.reply(message, {
-          title: `Success! Your ticket (${secondResult.rows[0].CaseNumber}) has been created`,
-          title_link: `https://cs3.salesforce.com./apex/SamanageESD__Incident?id=${secondResult.rows[0].Id}`,
+          title: `Success! Your ticket has been created`,
+          title_link: `https://cs3.salesforce.com./apex/SamanageESD__Incident?id=${secondResult.rows[0].sfid}`,
           text: `Subject: ${subject}`
         })
       })
