@@ -110,11 +110,11 @@ controller.hears('(.*)', ['direct_message', 'direct_mention'], (bot, message) =>
       console.log('Result:\n' + util.inspect(result.rows[0]))
       runQuery(responseQuery, [], (err, secondResult) => {
         if (err) console.log(err)
-        console.log(util.inspect('Second Result:\n' + secondResult.rows[0]))
+        console.log('Second Result:\n' + util.inspect(secondResult.rows[0]))
         bot.reply(message, {
           title: `Success! Your ticket (${secondResult.rows[0].CaseNumber}) has been created`,
           title_link: `https://cs3.salesforce.com./apex/SamanageESD__Incident?id=${secondResult.rows[0].Id}`,
-          text: `Subject: $[subject}`
+          text: `Subject: ${subject}`
         })
       })
     })
