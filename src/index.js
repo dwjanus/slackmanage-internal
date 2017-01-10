@@ -100,14 +100,23 @@ controller.hears('(.*)', ['direct_message', 'direct_mention'], (bot, message) =>
     let user = res.user.profile.real_name
     let recordtypeid = '012Q000000055QoIAI' // may need this later?
     let description = `Automated incident creation via HAL9000 slackbot for: ${res.user.profile.real_name} ~ Slack Id: ${message.user}`
-    let query = 'INSERT INTO salesforcesandbox.case(subject, creatorname, samanageesd__creatorname__c, samanageesd__requestername__c, description, ' +
+    let createQuery = 'INSERT INTO salesforcesandbox.case(subject, creatorname, samanageesd__creatorname__c, samanageesd__requestername__c, description, ' +
       'recordtypeid, samanageesd__recordtype__c, origin) values($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *;'
     let args = [subject, user, user, user, description, recordtypeid, 'Incident', 'Slack']
+    let responseQuery = `SELECT * FROM salesforcesandbox.case WHERE subject = '${subject}'`
 
-    runQuery(query, args, (err, result) => {
+    runQuery(createQuery, args, (err, result) => {
       if (err) console.log(err)
-      console.log(util.inspect(result.rows[0]))
-      bot.reply(message, {text: `Your ticket for: "${subject}" has been submitted!`})
+      console.log('Result:\n' + util.inspect(result.rows[0]))
+      runQuery(responseQuery, [], (err, secondResult) => {
+        if (err) console.log(err)
+        console.log(util.inspect('Second Result:\n' + secondResult.rows[0]))
+        bot.reply(message, {
+          title: `Success! Your ticket (${secondResult.rows[0].CaseNumber}) has been created`,
+          title_link: `https://cs3.salesforce.com./apex/SamanageESD__Incident?id=${secondResult.rows[0].Id}`,
+          text: `Subject: $[subject}`
+        })
+      })
     })
   })
 })
