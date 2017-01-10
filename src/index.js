@@ -98,11 +98,11 @@ controller.hears('(.*)', ['direct_message', 'direct_mention'], (bot, message) =>
     if (err) console.log(err)
     let subject = message.text
     let user = res.user.profile.real_name
-    // let recordtypeid = '012Q000000055QoIAI' // may need this later?
+    let recordtypeid = '012Q000000055QoIAI' // may need this later?
     let description = `Automated incident creation via HAL9000 slackbot for: ${res.user.profile.real_name} ~ Slack Id: ${message.user}`
-    let query = 'INSERT INTO salesforcesandbox.case(subject, samanageesd__creatorname__c, samanageesd__requestername__c, description, ' +
-      'samanageesd__recordtype__c, origin) values($1, $2, $3, $4, $5, $6) RETURNING *;'
-    let args = [subject, user, user, description, 'Incident', 'Slack']
+    let query = 'INSERT INTO salesforcesandbox.case(subject, creatorname, samanageesd__creatorname__c, samanageesd__requestername__c, description, ' +
+      'recordtypeid, samanageesd__recordtype__c, origin) values($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *;'
+    let args = [subject, user, user, user, description, recordtypeid, 'Incident', 'Slack']
 
     runQuery(query, args, (err, result) => {
       if (err) console.log(err)
