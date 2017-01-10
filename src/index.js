@@ -1,27 +1,43 @@
 
 import http from 'http'
 import util from 'util'
-import pg from 'pg'
 import Botkit from 'botkit'
-import config from './config/config.js'
+import db from './lib/db.js'
+import config from './lib/config.js'
 
 // Simple hack to ping server every 5min and keep app running
 setInterval(() => {
   http.get('http://slackmanage-internal.herokuapp.com')
 }, 300000)
 
-pg.defaults.ssl = true
-const client = new pg.Client(config('DATABASE_URL'))
-client.connect((err) => {
-  if (err) throw err
-  else console.log('** Connected to postgres! Getting schemas...')
-})
+// function runQuery (query, args, callback) {
+//   db.query(query, args).then(res => {
+//     return res.rows[0]
+//   })
+// }
 
-function runQuery (query, args, callback) {
-  client.query(query, args, (err, result) => {
-    callback(err, result)
-  })
+async function runQuery (query, args) {
+  try {
+    var response = await db.query(query, args)
+    return response
+  } catch (err) {
+    console.log(err)
+  }
 }
+
+// pg.defaults.ssl = true
+// const client = new pg.Client(config('DATABASE_URL'))
+// client.connect((err) => {
+//   if (err) throw err
+//   else console.log('** Connected to postgres! Getting schemas...')
+// })
+
+// function runQuery (query, args, callback) {
+//   client.query(query, args, (err, result) => {
+//     if (err) console.log(err)
+//     callback(err, result)
+//   })
+// }
 
 const port = process.env.PORT || process.env.port || config('PORT')
 
@@ -105,18 +121,31 @@ controller.hears('(.*)', ['direct_message', 'direct_mention'], (bot, message) =>
     let args = [subject, user, user, user, description, recordtypeid, 'Incident', 'Slack']
     let responseQuery = `SELECT * FROM salesforcesandbox.case WHERE subject = '${subject}'`
 
-    runQuery(createQuery, args, (err, result) => {
-      if (err) console.log(err)
-      console.log('Result:\n' + util.inspect(result))
-      console.log('Result rows:\n' + util.inspect(result.rows))
-      runQuery(responseQuery, [], (err, secondResult) => {
-        if (err) console.log(err)
-        console.log('Second Result:\n' + util.inspect(secondResult))
-        console.log('Second Result rows:\n' + util.inspect(secondResult.rows))
-        console.log('Second Result rows[0]:\n' + util.inspect(secondResult.rows[0]))
+    // runQuery(createQuery, args, (err, result) => {
+    //   if (err) console.log(err)
+    //   console.log('Result:\n' + util.inspect(result))
+    //   console.log('Result rows:\n' + util.inspect(result.rows))
+    //   runQuery(responseQuery, [], (err, secondResult) => {
+    //     if (err) console.log(err)
+    //     console.log('Second Result:\n' + util.inspect(secondResult))
+    //     console.log('Second Result rows:\n' + util.inspect(secondResult.rows))
+    //     console.log('Second Result rows[0]:\n' + util.inspect(secondResult.rows[0]))
+    //     bot.reply(message, {
+    //       title: `Success! Your ticket has been created`,
+    //       title_link: `https://cs3.salesforce.com./apex/SamanageESD__Incident?id=${secondResult.rows[0].anonymous.sfid}`,
+    //       text: `Subject: ${subject}`
+    //     })
+    //   })
+    // })
+    runQuery(createQuery, args)
+    .then(res => {
+      console.log(util.inspect(res))
+      runQuery(responseQuery, [])
+      .then(res2 => {
+        console.log(util.inspect(res2))
         bot.reply(message, {
           title: `Success! Your ticket has been created`,
-          title_link: `https://cs3.salesforce.com./apex/SamanageESD__Incident?id=${secondResult.rows[0].sfid}`,
+          title_link: `https://cs3.salesforce.com./apex/SamanageESD__Incident?id=${res2.rows[0].anonymous.sfid}`,
           text: `Subject: ${subject}`
         })
       })

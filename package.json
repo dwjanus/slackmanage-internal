@@ -40,7 +40,9 @@
     "https": "^1.0.0",
     "lodash": "^4.6.1",
     "pg": "6.1.2",
-    "slack": "^6.1.0"
+    "pg-pool": "^1.6.0",
+    "slack": "^6.1.0",
+    "url": "^0.11.0"
   },
   "keywords": [
     "service cloud",
