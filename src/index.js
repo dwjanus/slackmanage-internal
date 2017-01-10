@@ -12,7 +12,7 @@ setInterval(() => {
 
 async function runQuery (query, args) {
   try {
-    var response = await db.query(query, args)
+    let response = await db.query(query, args)
     return response
   } catch (err) {
     console.log(err)
@@ -104,14 +104,17 @@ controller.hears('(.*)', ['direct_message', 'direct_mention'], (bot, message) =>
     runQuery(createQuery, args)
     .then(res => {
       console.log(util.inspect(res.rows))
-    }).then(() => {
-      runQuery(responseQuery, [])
-    }).then(res2 => {
-      console.log(util.inspect(res2.rows))
-      bot.reply(message, {
-        title: `Success! Your ticket has been created`,
-        title_link: `https://cs3.salesforce.com./apex/SamanageESD__Incident?id=${res2.rows[0].sfid}`,
-        text: `Subject: ${subject}`
+      db.on('status', (msg) => {
+        console.log(msg)
+        runQuery(responseQuery, [])
+        .then(res2 => {
+          console.log(util.inspect(res2.rows))
+          bot.reply(message, {
+            title: `Success! Your ticket has been created`,
+            title_link: `https://cs3.salesforce.com./apex/SamanageESD__Incident?id=${res2.rows[0].sfid}`,
+            text: `Subject: ${subject}`
+          })
+        })
       })
     })
   })

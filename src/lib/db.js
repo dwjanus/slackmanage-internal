@@ -16,6 +16,7 @@ const pgConfig = {
 }
 
 const pool = new Pool(pgConfig)
+pool.query('LISTEN status')
 
 module.exports.query = (text, values) => {
   return pool.query(text, values)
