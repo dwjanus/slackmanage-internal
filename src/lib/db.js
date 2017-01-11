@@ -17,9 +17,9 @@ const pgConfig = {
 }
 
 const pool = new Pool(pgConfig)
-pool.query('LISTEN status')
+const listener = pool.query("LISTEN status")
 pool.on('notify_ready', (msg) => {
-  console.log('** status change registered in db.js: ' + util.inspect(msg))
+  console.log('** status change registered in db.js: ' + util.inspect(msg.payload))
 })
 
 module.exports.query = (text, values) => {

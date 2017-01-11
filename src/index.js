@@ -14,9 +14,6 @@ async function runQuery (query, args) {
   try {
     let response = await db.query(query, args)
     let temp = db.query("LISTEN status")
-    db.on('notify_ready', (msg) => {
-      console.log('** status change registered in index.js: ' + util.inspect(msg.payload))
-    })
     return response
   } catch (err) {
     console.log(err)
