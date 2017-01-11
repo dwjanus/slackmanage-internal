@@ -10,6 +10,13 @@ setInterval(() => {
   http.get('http://slackmanage-internal.herokuapp.com')
 }, 300000)
 
+db.query('LISTEN "status"', (err, res) => {
+  if (err) console.log(err)
+  res.on('notification', (msg) => {
+    console.log('** status change registered in index.js: ' + util.inspect(msg))
+  })
+})
+
 async function runQuery (query, args) {
   try {
     let response = await db.query(query, args)
@@ -101,9 +108,6 @@ controller.hears('(.*)', ['direct_message', 'direct_mention'], (bot, message) =>
     let args = [subject, user, user, user, description, recordtypeid, 'Incident', 'Slack']
     let responseQuery = `SELECT * FROM salesforcesandbox.case WHERE subject = '${subject}'`
     runQuery(createQuery, args)
-    .then(res => {
-      console.log(util.inspect(res.rows))
-    })
     .then(() => {
       runQuery(responseQuery, [])
       .then(res2 => {
