@@ -13,6 +13,10 @@ setInterval(() => {
 async function runQuery (query, args) {
   try {
     let response = await db.query(query, args)
+    db.query('LISTEN status')
+    db.on('notify_ready', (msg) => {
+      console.log('** status change registered in index.js: ' + util.inspect(msg))
+    })
     return response
   } catch (err) {
     console.log(err)
@@ -102,17 +106,13 @@ controller.hears('(.*)', ['direct_message', 'direct_mention'], (bot, message) =>
     let responseQuery = `SELECT * FROM salesforcesandbox.case WHERE subject = '${subject}'`
     runQuery(createQuery, args)
     .then(() => {
-      db.query('LISTEN status')
-      db.on('notify_ready', (msg) => {
-        console.log('** status change registered in db.js: ' + util.inspect(msg))
-        runQuery(responseQuery, [])
-        .then(res2 => {
-          console.log(util.inspect(res2.rows))
-          bot.reply(message, {
-            title: `Success! Your ticket has been created`,
-            title_link: `https://cs3.salesforce.com./apex/SamanageESD__Incident?id=${res2.rows[0].sfid}`,
-            text: `Subject: ${subject}`
-          })
+      runQuery(responseQuery, [])
+      .then(res2 => {
+        console.log(util.inspect(res2.rows))
+        bot.reply(message, {
+          title: `Success! Your ticket has been created`,
+          title_link: `https://cs3.salesforce.com./apex/SamanageESD__Incident?id=${res2.rows[0].sfid}`,
+          text: `Subject: ${subject}`
         })
       })
     })
