@@ -104,8 +104,8 @@ controller.hears('(.*)', ['direct_message', 'direct_mention'], (bot, message) =>
     .then(res => {
       console.log(util.inspect(res.rows))
     })
-
-    db.on('status', (msg) => {
+    db.query('LISTEN status')
+    db.on('notification', (msg) => {
       console.log('** status change: ' + util.inspect(msg))
       if (msg._hc_lastop == 'UPDATED') {
         console.log('** ~ notification ~ Status: UPDATED **')
