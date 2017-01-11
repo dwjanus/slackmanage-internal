@@ -100,12 +100,15 @@ controller.hears('(.*)', ['direct_message', 'direct_mention'], (bot, message) =>
       'recordtypeid, samanageesd__recordtype__c, origin) values($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *;'
     let args = [subject, user, user, user, description, recordtypeid, 'Incident', 'Slack']
     let responseQuery = `SELECT * FROM salesforcesandbox.case WHERE subject = '${subject}'`
-
     runQuery(createQuery, args)
     .then(res => {
       console.log(util.inspect(res.rows))
-      db.on('status', (msg) => {
-        console.log(msg)
+    })
+
+    db.on('status', (msg) => {
+      console.log('** status change: ' + util.inspect(msg))
+      if (msg._hc_lastop == 'UPDATED') {
+        console.log('** ~ notification ~ Status: UPDATED **')
         runQuery(responseQuery, [])
         .then(res2 => {
           console.log(util.inspect(res2.rows))
@@ -115,7 +118,7 @@ controller.hears('(.*)', ['direct_message', 'direct_mention'], (bot, message) =>
             text: `Subject: ${subject}`
           })
         })
-      })
+      }
     })
   })
 })
