@@ -17,8 +17,8 @@ const pgConfig = {
 }
 
 const pool = new Pool(pgConfig)
-pool.query('LISTEN status')
-pool.on('notification', (msg) => {
+const query = pool.query('LISTEN status')
+query.on('notification', (msg) => {
   console.log('** status change registered: ' + util.inspect(msg))
 })
 
