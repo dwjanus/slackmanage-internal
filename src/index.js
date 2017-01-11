@@ -10,13 +10,6 @@ setInterval(() => {
   http.get('http://slackmanage-internal.herokuapp.com')
 }, 300000)
 
-db.query('LISTEN "status"', (err, res) => {
-  if (err) console.log(err)
-  res.on('notification', (msg) => {
-    console.log('** status change registered in index.js: ' + util.inspect(msg))
-  })
-})
-
 async function runQuery (query, args) {
   try {
     let response = await db.query(query, args)
