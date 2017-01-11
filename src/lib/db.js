@@ -29,7 +29,7 @@ const pool = new Pool(pgConfig)
 pool.query('LISTEN status;', [], () => {
   console.log('** db is LISTENing to status')
 })
-pool.on('notify_ready', (msg) => {
+pool.on('notify_ready' || 'notification', (msg) => {
   console.log('** status change registered in db.js:\n' + util.inspect(msg.payload))
 })
 
