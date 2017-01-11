@@ -17,6 +17,15 @@ const pgConfig = {
 }
 
 const pool = new Pool(pgConfig)
+// pool.on('connect', client => {
+//   const query = client.query('LISTEN status;', [], () => {
+//     console.log('** db is LISTENing to status via query variable')
+//   })
+//   client.on('notify_ready', (msg) => {
+//     console.log('** status change registered in db.js:\n' + util.inspect(msg.payload))
+//   }).then(client => client.release())
+// })
+
 pool.query('LISTEN status;', [], () => {
   console.log('** db is LISTENing to status')
 })
