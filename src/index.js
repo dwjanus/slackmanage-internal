@@ -13,7 +13,6 @@ setInterval(() => {
 async function runQuery (query, args) {
   try {
     let response = await db.query(query, args)
-    let temp = db.query("LISTEN status")
     return response
   } catch (err) {
     console.log(err)
@@ -103,13 +102,19 @@ controller.hears('(.*)', ['direct_message', 'direct_mention'], (bot, message) =>
     let responseQuery = `SELECT * FROM salesforcesandbox.case WHERE subject = '${subject}'`
     runQuery(createQuery, args)
     .then(() => {
-      runQuery(responseQuery, [])
-      .then(res2 => {
-        console.log(util.inspect(res2.rows))
-        bot.reply(message, {
-          title: `Success! Your ticket has been created`,
-          title_link: `https://cs3.salesforce.com./apex/SamanageESD__Incident?id=${res2.rows[0].sfid}`,
-          text: `Subject: ${subject}`
+      db.query("LISTEN status", (err, res) => {
+        if (err) console.log(err)
+        res.on('notify_ready', (msg) => {
+          console.log(util.inspect(msg.paylod))
+          runQuery(responseQuery, [])
+          .then(res2 => {
+            console.log(util.inspect(res2.rows))
+            bot.reply(message, {
+              title: `Success! Your ticket has been created`,
+              title_link: `https://cs3.salesforce.com./apex/SamanageESD__Incident?id=${res2.rows[0].sfid}`,
+              text: `Subject: ${subject}`
+            })
+          })
         })
       })
     })
