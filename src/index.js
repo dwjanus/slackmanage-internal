@@ -102,10 +102,10 @@ controller.hears('(.*)', ['direct_message', 'direct_mention'], (bot, message) =>
     let responseQuery = `SELECT * FROM salesforcesandbox.case WHERE subject = '${subject}'`
     runQuery(createQuery, args)
     .then(() => {
-      db.query("LISTEN status", (err, res) => {
+      db.query('LISTEN status', (err, res) => {
         if (err) console.log(err)
         res.on('notify_ready', (msg) => {
-          console.log(util.inspect(msg.paylod))
+          console.log('notify heard from inside index:\n' + util.inspect(msg.paylod))
           runQuery(responseQuery, [])
           .then(res2 => {
             console.log(util.inspect(res2.rows))
