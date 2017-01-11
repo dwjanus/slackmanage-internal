@@ -103,7 +103,8 @@ controller.hears('(.*)', ['direct_message', 'direct_mention'], (bot, message) =>
     runQuery(createQuery, args)
     .then(res => {
       console.log(util.inspect(res.rows))
-    }).then(() => {
+    })
+    .then(() => {
       runQuery(responseQuery, [])
       .then(res2 => {
         console.log(util.inspect(res2.rows))
