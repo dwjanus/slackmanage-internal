@@ -26,7 +26,7 @@ const pool = new Pool(pgConfig)
 //   }).then(client => client.release())
 // })
 
-pool.query('LISTEN status;', [], () => {
+const query = pool.query('LISTEN status;', [], () => {
   console.log('** db is LISTENing to status')
 })
 pool.on('notify_ready' || 'notification', (msg) => {

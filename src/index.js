@@ -10,8 +10,8 @@ setInterval(() => {
   http.get('http://slackmanage-internal.herokuapp.com')
 }, 300000)
 
-const query = db.query('LISTEN status;', [], () => {
-  console.log('** query listening from inside index')
+const query = db.query('LISTEN status;', [], (res) => {
+  console.log('** query listening from inside index\n' + util.inspect(res))
 })
 
 async function runQuery (query, args) {
