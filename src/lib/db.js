@@ -1,5 +1,6 @@
 
 import Pool from 'pg-pool'
+import util from 'util'
 import url from 'url'
 import config from './config.js'
 
@@ -16,6 +17,10 @@ const pgConfig = {
 }
 
 const pool = new Pool(pgConfig)
+pool.query('LISTEN status')
+pool.on('notification', (msg) => {
+  console.log('** status change registered: ' + util.inspect(msg))
+})
 
 module.exports.query = (text, values) => {
   return pool.query(text, values)

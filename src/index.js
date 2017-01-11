@@ -103,22 +103,16 @@ controller.hears('(.*)', ['direct_message', 'direct_mention'], (bot, message) =>
     runQuery(createQuery, args)
     .then(res => {
       console.log(util.inspect(res.rows))
-    })
-    db.query('LISTEN status')
-    db.on('notification', (msg) => {
-      console.log('** status change: ' + util.inspect(msg))
-      if (msg._hc_lastop == 'UPDATED') {
-        console.log('** ~ notification ~ Status: UPDATED **')
-        runQuery(responseQuery, [])
-        .then(res2 => {
-          console.log(util.inspect(res2.rows))
-          bot.reply(message, {
-            title: `Success! Your ticket has been created`,
-            title_link: `https://cs3.salesforce.com./apex/SamanageESD__Incident?id=${res2.rows[0].sfid}`,
-            text: `Subject: ${subject}`
-          })
+    }).then(() => {
+      runQuery(responseQuery, [])
+      .then(res2 => {
+        console.log(util.inspect(res2.rows))
+        bot.reply(message, {
+          title: `Success! Your ticket has been created`,
+          title_link: `https://cs3.salesforce.com./apex/SamanageESD__Incident?id=${res2.rows[0].sfid}`,
+          text: `Subject: ${subject}`
         })
-      }
+      })
     })
   })
 })
