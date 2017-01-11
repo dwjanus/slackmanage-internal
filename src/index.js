@@ -117,6 +117,11 @@ controller.hears('(.*)', ['direct_message', 'direct_mention'], (bot, message) =>
   })
 })
 
+db.query('LISTEN status')
+db.on('notification', (msg) => {
+  console.log('** status change registered in index: ' + util.inspect(msg))
+})
+
 // Handler for interractive message buttons
 controller.on('interactive_message_callback', (bot, message) => {
   console.log(`** interractive message callback ${message.callback_id} recieved **`)
