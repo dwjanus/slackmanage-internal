@@ -17,14 +17,9 @@ const pgConfig = {
 }
 
 const pool = new Pool(pgConfig)
-pool.query('LISTEN status', (err, res) => {
-  console.log('listener is listening in db')
-  if (err) console.log(err)
-  res.on('notify_ready', (msg) => {
-    console.log('** listener heard notify_ready from inside callback:\n' + util.inspect(msg.payload))
-  })
+pool.query('LISTEN status;', () => {
+  console.log('** db is LISTENing to status')
 })
-
 pool.on('notify_ready', (msg) => {
   console.log('** status change registered in db.js:\n' + util.inspect(msg.payload))
 })
