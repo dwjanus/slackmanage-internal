@@ -10,6 +10,10 @@ setInterval(() => {
   http.get('http://slackmanage-internal.herokuapp.com')
 }, 300000)
 
+const query = db.query('LISTEN status', [], () => {
+  console.log('** query listening from inside index')
+})
+
 async function runQuery (query, args) {
   try {
     let response = await db.query(query, args)
@@ -102,7 +106,7 @@ controller.hears('(.*)', ['direct_message', 'direct_mention'], (bot, message) =>
     let responseQuery = `SELECT * FROM salesforcesandbox.case WHERE subject = '${subject}'`
     runQuery(createQuery, args)
     .then(() => {
-      db.on('notify_ready', (msg) => {
+      db.on('notify_ready' || 'notification', (msg) => {
         console.log('notify heard from inside index:\n' + util.inspect(msg.paylod))
         runQuery(responseQuery, [])
         .then(res2 => {
