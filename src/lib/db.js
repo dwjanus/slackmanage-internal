@@ -65,20 +65,20 @@ module.exports.createCase = (subject, user, description, cb) => {
     'description, recordtypeid, samanageesd__recordtype__c, origin) ' +
     'values($1, $2, $3, $4, $5, $6, $7, $8);'
   let args = [subject, user, user, user, description, recordtypeid, 'Incident', 'Slack']
-  // return pool.query(createQuery, args, (err, result) => {
-  //   if (err) cb(err)
-  //   observe(subject)
-  //   cb(null, result.rows[0])
-  // })
-  observe(subject)
-  return cb(pool.query(createQuery, args))
+  return pool.query(createQuery, args, (err, result) => {
+    if (err) cb(err)
+    observe(subject)
+    cb(null, result.rows[0])
+  })
+  // observe(subject)
+  // return cb(pool.query(createQuery, args))
 }
 
 module.exports.retrieveCase = (subject, cb) => {
   let retrieveQuery = `SELECT * FROM salesforcesandbox.case WHERE subject = '${subject}'`
-  // pool.query(retrieveQuery, [], (err, result) => {
-  //   if (err) cb(err)
-  //   return cb(null, result.rows[0])
-  // })
-  return cb(pool.query(retrieveQuery, []))
+  return pool.query(retrieveQuery, [], (err, result) => {
+    if (err) cb(err)
+    cb(null, result.rows[0])
+  })
+  // return cb(pool.query(retrieveQuery, []))
 }
