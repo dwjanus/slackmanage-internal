@@ -65,10 +65,10 @@ module.exports.createCase = (subject, user, description, cb) => {
     'description, recordtypeid, samanageesd__recordtype__c, origin) ' +
     'values($1, $2, $3, $4, $5, $6, $7, $8);'
   let args = [subject, user, user, user, description, recordtypeid, 'Incident', 'Slack']
-  pool.query(createQuery, args, (err, result) => {
-    if (err) return cb(err)
+  return pool.query(createQuery, args, (err, result) => {
+    if (err) cb(err)
     observe(subject)
-    return cb(null, result.rows[0])
+    cb(null, result.rows[0])
   })
 }
 
