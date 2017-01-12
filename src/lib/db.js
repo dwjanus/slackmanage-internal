@@ -71,7 +71,7 @@ module.exports.createCase = (subject, user, description, cb) => {
   //   cb(null, result.rows[0])
   // })
   observe(subject)
-  cb(pool.query(createQuery, args))
+  return cb(pool.query(createQuery, args))
 }
 
 module.exports.retrieveCase = (subject, cb) => {
@@ -80,5 +80,5 @@ module.exports.retrieveCase = (subject, cb) => {
   //   if (err) cb(err)
   //   return cb(null, result.rows[0])
   // })
-  cb(pool.query(retrieveQuery, []))
+  return cb(pool.query(retrieveQuery, []))
 }

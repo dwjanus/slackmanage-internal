@@ -90,7 +90,7 @@ controller.hears('(.*)', ['direct_message', 'direct_mention'], (bot, message) =>
       if (err) console.log(err)
       console.log('Create Case response:\n', util.inspect(res))
       bot.say('Success! Your ticket has been created')
-      db.retrieveCase(subject, user, (err, res) => {
+      db.retrieveCase(subject, (err, res) => {
         if (err) console.log(err)
         console.log('Retrieve Case response:\n', util.inspect(res))
         bot.reply(message, {
