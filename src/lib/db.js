@@ -68,7 +68,7 @@ module.exports.createCase = (subject, user, description, cb) => {
   pool.query(createQuery, args, (err, result) => {
     if (err) return cb(err)
     observe(subject)
-    cb(null, result.rows[0])
+    return cb(null, result.rows[0])
   })
 }
 
@@ -76,6 +76,6 @@ module.exports.retrieveCase = (subject, cb) => {
   let retrieveQuery = `SELECT * FROM salesforcesandbox.case WHERE subject = '${subject}'`
   pool.query(retrieveQuery, [], (err, result) => {
     if (err) cb(err)
-    cb(null, result.rows[0])
+    return cb(null, result.rows[0])
   })
 }
