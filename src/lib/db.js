@@ -21,7 +21,7 @@ const pgConfig = {
 const pool = new Pool(pgConfig)
 
 // observer for status field
-async function observe () {
+async function observe (subject) {
   try {
     let db = await pgp(config('DATABASE_URL'))
     let queryObserver = new PgQueryObserver(db, 'status')
@@ -40,7 +40,7 @@ async function observe () {
     process.on('SIGTERM', cleanupAndExit)
     process.on('SIGINT', cleanupAndExit)
 
-    let query = `SELECT * FROM salesforcesandbox.case`
+    let query = `SELECT * FROM salesforcesandbox.case WHERE subject = '${subject}`
     let params = []
     let handle = await queryObserver.notify(query, params, triggers, diff => {
       console.log('** QUERY NOTIFICATION: ', util.insepct(diff))
@@ -53,8 +53,6 @@ async function observe () {
     console.error(err)
   }
 }
-
-observe()
 
 module.exports.query = (text, values) => {
   return pool.query(text, values)
@@ -69,12 +67,13 @@ module.exports.createCase = (subject, user, description, cb) => {
   let args = [subject, user, user, user, description, recordtypeid, 'Incident', 'Slack']
   pool.query(createQuery, args, (err, result) => {
     if (err) return cb(err)
+    observe(subject)
     cb(null, result.rows[0])
   })
 }
 
-module.exports.retrieveCase = (subject, user, cb) => {
-  let retrieveQuery = `SELECT * FROM salesforcesandbox.case WHERE subject = '${subject}' AND creatorname = '${user}'`
+module.exports.retrieveCase = (subject, cb) => {
+  let retrieveQuery = `SELECT * FROM salesforcesandbox.case WHERE subject = '${subject}'`
   pool.query(retrieveQuery, [], (err, result) => {
     if (err) cb(err)
     cb(null, result.rows[0])
