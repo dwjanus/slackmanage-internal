@@ -10,19 +10,6 @@ setInterval(() => {
   http.get('http://slackmanage-internal.herokuapp.com')
 }, 300000)
 
-const query = db.query('LISTEN status;', [], (res) => {
-  console.log('** query listening from inside index\n' + util.inspect(res))
-})
-
-async function runQuery (query, args) {
-  try {
-    let response = await db.query(query, args)
-    return response
-  } catch (err) {
-    console.log(err)
-  }
-}
-
 const port = process.env.PORT || process.env.port || config('PORT')
 
 if (!port) {
@@ -98,24 +85,18 @@ controller.hears('(.*)', ['direct_message', 'direct_mention'], (bot, message) =>
     if (err) console.log(err)
     let subject = message.text
     let user = res.user.profile.real_name
-    let recordtypeid = '01239000000EB4NAAW' // may need this later?
     let description = `Automated incident creation via HAL9000 slackbot for: ${res.user.profile.real_name} ~ Slack Id: ${message.user}`
-    let createQuery = 'INSERT INTO salesforcesandbox.case(subject, creatorname, samanageesd__creatorname__c, samanageesd__requestername__c, description, ' +
-      'recordtypeid, samanageesd__recordtype__c, origin) values($1, $2, $3, $4, $5, $6, $7, $8);'
-    let args = [subject, user, user, user, description, recordtypeid, 'Incident', 'Slack']
-    let responseQuery = `SELECT * FROM salesforcesandbox.case WHERE subject = '${subject}'`
-    runQuery(createQuery, args)
-    .then(() => {
-      db.on('notify_ready' || 'notification', (msg) => {
-        console.log('notify heard from inside index:\n' + util.inspect(msg.paylod))
-        runQuery(responseQuery, [])
-        .then(res2 => {
-          console.log(util.inspect(res2.rows))
-          bot.reply(message, {
-            title: `Success! Your ticket has been created`,
-            title_link: `https://cs3.salesforce.com./apex/SamanageESD__Incident?id=${res2.rows[0].sfid}`,
-            text: `Subject: ${subject}`
-          })
+    db.createCase(subject, user, description, (err, res) => {
+      if (err) console.log(err)
+      console.log('Create Case response:\n', util.inspect(res))
+      bot.say('`Success! Your ticket has been created`')
+      db.retrieveCase(subject, user, (err, res) => {
+        if (err) console.log(err)
+        console.log('Retrieve Case response:\n', util.inspect(res))
+        bot.reply(message, {
+          title: `Case: ${res.casenumber}`,
+          title_link: `https://cs3.salesforce.com./apex/SamanageESD__Incident?id=${res.sfid}`,
+          text: `Subject: ${subject}`
         })
       })
     })
