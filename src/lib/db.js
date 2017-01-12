@@ -4,8 +4,9 @@ import util from 'util'
 import url from 'url'
 import config from './config.js'
 import PgQueryObserver from 'pg-query-observer'
+const pgp = require('pg-promise')()
 
-// config
+// config for pool
 const params = url.parse(config('DATABASE_URL'))
 const auth = params.auth.split(':')
 const pgConfig = {
@@ -17,17 +18,17 @@ const pgConfig = {
   max: 10,
   ssl: true
 }
-
 const pool = new Pool(pgConfig)
 
-// establish connection to db and stand up our observer
-async function observe (client) {
+// observer for status field
+async function observe () {
   try {
+    let db = await pgp(config('DATABASE_URL'))
+    let queryObserver = new PgQueryObserver(db, 'status')
     console.log('- Observing client now')
-    const queryObserver = new PgQueryObserver(client, 'status')
 
     function triggers (change) {
-      console.log('triggers', change)
+      console.log('- triggers', change)
       return true
     }
 
@@ -42,7 +43,7 @@ async function observe (client) {
     let query = `SELECT * FROM salesforcesandbox.case`
     let params = []
     let handle = await queryObserver.notify(query, params, triggers, diff => {
-      console.log('** QUERY NOTIFY: ', util.insepct(diff))
+      console.log('** QUERY NOTIFICATION: ', util.insepct(diff))
     })
 
     console.log('- handler rows:\n', handle.rows)
@@ -53,10 +54,7 @@ async function observe (client) {
   }
 }
 
-pool.on('connect', client => {
-  console.log('- Client created from pool')
-  observe(client)
-})
+observe()
 
 module.exports.query = (text, values) => {
   return pool.query(text, values)
@@ -76,7 +74,7 @@ module.exports.createCase = (subject, user, description, cb) => {
 }
 
 module.exports.retrieveCase = (subject, user, cb) => {
-  let retrieveQuery = `SELECT * FROM salesforcesandbox.case WHERE subject = '${subject}' AND user = '${user}'`
+  let retrieveQuery = `SELECT * FROM salesforcesandbox.case WHERE subject = '${subject}' AND creatorname = '${user}'`
   pool.query(retrieveQuery, [], (err, result) => {
     if (err) cb(err)
     cb(null, result.rows[0])
