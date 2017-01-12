@@ -40,7 +40,7 @@ async function observe (subject) {
     process.on('SIGTERM', cleanupAndExit)
     process.on('SIGINT', cleanupAndExit)
 
-    let query = `SELECT * FROM salesforcesandbox.case WHERE subject = '${subject}`
+    let query = `SELECT * FROM salesforcesandbox.case WHERE subject = '${subject}'`
     let params = []
     let handle = await queryObserver.notify(query, params, triggers, diff => {
       console.log('** QUERY NOTIFICATION: ', util.insepct(diff))
