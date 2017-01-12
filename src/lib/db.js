@@ -21,9 +21,10 @@ const pgConfig = {
 const pool = new Pool(pgConfig)
 
 // establish connection to db and stand up our observer
-async function observe (subject, user) {
+async function observe (client) {
   try {
-    const queryObserver = new PgQueryObserver(pool, 'status')
+    console.log('- Observing client now')
+    const queryObserver = new PgQueryObserver(client, 'status')
 
     function triggers (change) {
       console.log('triggers', change)
@@ -38,19 +39,24 @@ async function observe (subject, user) {
     process.on('SIGTERM', cleanupAndExit)
     process.on('SIGINT', cleanupAndExit)
 
-    let query = `SELECT * FROM salesforcesandbox.case WHERE subject = '${subject}' AND user = '${user}'`
+    let query = `SELECT * FROM salesforcesandbox.case`
     let params = []
     let handle = await queryObserver.notify(query, params, triggers, diff => {
       console.log('** QUERY NOTIFY: ', util.insepct(diff))
     })
 
-    console.log('handler rows', handle.rows)
-    await handle.stop()
-    await queryObserver.cleanup()
+    console.log('- handler rows:\n', handle.rows)
+    // await handle.stop()
+    // await queryObserver.cleanup()
   } catch (err) {
     console.error(err)
   }
 }
+
+pool.on('connect', client => {
+  console.log('- Client created from pool')
+  observe(client)
+})
 
 module.exports.query = (text, values) => {
   return pool.query(text, values)
@@ -65,11 +71,7 @@ module.exports.createCase = (subject, user, description, cb) => {
   let args = [subject, user, user, user, description, recordtypeid, 'Incident', 'Slack']
   pool.query(createQuery, args, (err, result) => {
     if (err) return cb(err)
-    observe(subject, user)
-    .then(() => {
-      console.log('** Observer finished Observing, returning query response now') // console.log('Response from Observer:\n', util.inspect(res))
-      cb(null, result.rows[0])
-    })
+    cb(null, result.rows[0])
   })
 }
 
