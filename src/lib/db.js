@@ -30,11 +30,10 @@ module.exports.createCase = (subject, user, description, cb) => {
   pool.query(createQuery, args)
   pool.query('LISTEN status;')
   console.log(' -- after query listener --')
-  pool.on('notifification', (err, msg) => {
-    if (err) console.log(err)
+  pool.on('notifification', (msg) => {
     console.log('~ notify ready fired ~')
     console.log('--> notification message: ', util.inspect(msg))
-    return cb(null, msg)
+    return cb(null, msg.payload)
   })
 }
 
