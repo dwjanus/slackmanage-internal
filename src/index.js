@@ -103,10 +103,10 @@ controller.hears('(.*)', ['direct_message', 'direct_mention'], (bot, message) =>
     // })
     db.createCase(subject, user, description, (err, res) => {
       if (err) console.log(err)
-      console.log('~ inside of createCase ~')
-      console.log('--> Create Case response:\n', util.inspect(res))
+      console.log('--> Create Case response: ', util.inspect(res))
       db.retrieveCase(res, (err, result) => {
         if (err) console.log(err)
+        console.log('App-level Retrieval result: ' + util.inspect(result))
         bot.reply(message, {
           title: `Case: ${result.casenumber}`,
           title_link: `https://cs60.salesforce.com./apex/SamanageESD__Incident?id=${result.sfid}`,
