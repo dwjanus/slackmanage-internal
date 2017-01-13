@@ -111,7 +111,7 @@ controller.hears('(.*)', ['direct_message', 'direct_mention'], (bot, message) =>
     //     title_link: `https://cs3.salesforce.com./apex/SamanageESD__Incident?id=${res.sfid}`,
     //     text: `Subject: ${subject}`
     //   })
-    // })
+    })
   })
 })
 
