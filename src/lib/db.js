@@ -14,8 +14,8 @@ const pgConfig = {
   port: params.port,
   database: params.pathname.split('/')[1],
   max: 20,
-  ssl: true
-  // idleTimeoutMillis: 2000 // 2s idle timeout for clients
+  ssl: true,
+  idleTimeoutMillis: 2000 // 2s idle timeout for clients
 }
 const pool = new Pool(pgConfig)
 
@@ -29,9 +29,7 @@ module.exports.createCase = (subject, user, description, cb) => {
   pool.query(createQuery, args)
   console.log('~ Case created ~')
   pool.connect().then(client => {
-    console.log('~ client acquired from pool ~')
     client.query('LISTEN status')
-    console.log('~ listening to status ~')
     client.on('notification', data => {
       console.log(data.payload)
       client.release()
@@ -50,7 +48,6 @@ module.exports.createCase = (subject, user, description, cb) => {
 
 module.exports.retrieveCase = (sfid, cb) => {
   let retrieveQuery = `SELECT * FROM salesforcesandbox.case WHERE sfid = '${sfid}'`
-  console.log('retrieveQuery: ' + retrieveQuery)
   pool.query(retrieveQuery, [], (err, result) => {
     if (err) {
       cb(err, null)

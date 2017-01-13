@@ -41,12 +41,12 @@
     "lodash": "^4.6.1",
     "pg": "6.1.2",
     "pg-pool": "^1.6.0",
-    "pg-query-observer": "^1.0.3",
     "slack": "^6.1.0",
     "url": "^0.11.0"
   },
   "keywords": [
     "service cloud",
+    "salesforce",
     "samanage",
     "slack",
     "slack-bot",
