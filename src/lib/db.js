@@ -15,7 +15,7 @@ const pgConfig = {
   database: params.pathname.split('/')[1],
   max: 20,
   ssl: true,
-  idleTimeoutMillis: 2000 // 2s idle timeout for clients
+  idleTimeoutMillis: 3000 // 2s idle timeout for clients
 }
 const pool = new Pool(pgConfig)
 
