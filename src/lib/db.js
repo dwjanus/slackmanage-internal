@@ -48,12 +48,13 @@ module.exports.createCase = (subject, user, description, cb) => {
 }
 
 module.exports.retrieveCase = (sfid, cb) => {
-  let retrieveQuery = `SELECT * FROM salesforcesandbox.case WHERE sfid = '${sfid}'`
+  let retrieveQuery = `SELECT * FROM salesforcesandbox.case WHERE sfid = ${sfid}`
   pool.query(retrieveQuery, [], (err, result) => {
     if (err) {
       cb(err, null)
       return
     }
+    console.log('Retrieve Case result:\n', util.insepct(result))
     cb(null, result.rows[0])
   })
 }
