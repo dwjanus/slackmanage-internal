@@ -86,20 +86,32 @@ controller.hears('(.*)', ['direct_message', 'direct_mention'], (bot, message) =>
     let subject = message.text
     let user = res.user.profile.real_name
     let description = `Automated incident creation via HAL9000 slackbot for: ${res.user.profile.real_name} ~ Slack Id: ${message.user}`
+    // db.createCase(subject, user, description, (err, res) => {
+    //   if (err) console.log(err)
+    //   console.log('Create Case response:\n', util.inspect(res))
+    //   bot.say('Success! Your ticket has been created')
+    //   db.retrieveCase(subject, (err, res) => {
+    //     if (err) console.log(err)
+    //     console.log('Retrieve Case response:\n', util.inspect(res))
+    //     bot.reply(message, {
+    //       title: `Case: ${res.casenumber}`,
+    //       title_link: `https://cs3.salesforce.com./apex/SamanageESD__Incident?id=${res.sfid}`,
+    //       text: `Subject: ${subject}`
+    //     })
+    //   })
+    // })
     db.createCase(subject, user, description, (err, res) => {
       if (err) console.log(err)
-      console.log('Create Case response:\n', util.inspect(res))
-      bot.say('Success! Your ticket has been created')
-      db.retrieveCase(subject, (err, res) => {
-        if (err) console.log(err)
-        console.log('Retrieve Case response:\n', util.inspect(res))
-        bot.reply(message, {
-          title: `Case: ${res.casenumber}`,
-          title_link: `https://cs3.salesforce.com./apex/SamanageESD__Incident?id=${res.sfid}`,
-          text: `Subject: ${subject}`
-        })
+      res.on('notify_ready', msg => {
+        console.log(msg)
       })
-    })
+    //   console.log('Create Case response:\n', util.inspect(res))
+    //   bot.reply(message, {
+    //     title: `Case: ${res.casenumber}`,
+    //     title_link: `https://cs3.salesforce.com./apex/SamanageESD__Incident?id=${res.sfid}`,
+    //     text: `Subject: ${subject}`
+    //   })
+    // })
   })
 })
 
