@@ -31,13 +31,16 @@ module.exports.createCase = (subject, user, description, cb) => {
   pool.connect().then(client => {
     client.query('LISTEN status')
     client.on('notification', data => {
-      console.log(data.payload)
+      console.log('-- notification fired, data.payload:\n', data.payload)
       client.release()
+      console.log('-- client released, calling back results --')
       cb(null, data.payload)
     })
     .then(client => {
+      console.log('-- client released unlistening now... --')
       client.query('UNLISTEN status')
       client.release()
+      console.log('-- client released --')
     })
     .catch(err => {
       client.release()
