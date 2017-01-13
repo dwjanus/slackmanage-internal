@@ -17,14 +17,9 @@ const pgConfig = {
   database: params.pathname.split('/')[1],
   max: 20,
   ssl: true,
-  idleTimeoutMillis: 6000 // 6s timeout for clients
+  idleTimeoutMillis: 4000 // 4s timeout for clients
 }
 const pool = new Pool(pgConfig)
-
-pool.on('error', (err, client) => {
-  console.log(err)
-  client.release()
-})
 
 module.exports.createCase = (subject, user, description, cb) => {
   let recordtypeid = '01239000000EB4NAAW'
@@ -41,8 +36,9 @@ module.exports.createCase = (subject, user, description, cb) => {
     console.log('~ listening to status ~')
     client.on('notification', data => {
       console.log(data.payload)
-      client.release()
       cb(null, data.payload)
+    }).then(() => {
+      client.release()
     })
     .catch(err => {
       client.release()
