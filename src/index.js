@@ -81,7 +81,7 @@ controller.hears('^stop', 'direct_message', (bot, message) => {
 // ~ ~ * ~ ~ ~ * * ~ ~ ~ ~ * * * ~ ~ ~ ~ ~ * * * ~ ~ ~ ~ * * ~ ~ ~ * * ~ ~ ~ * * ~ ~ ~ * ~ ~ ~ * ~ ~ * ~ ~ //
 
 // Handler for case creation
-controller.hears('(.*)', ['direct_message', 'direct_mention'], (bot, message) => {
+controller.hears('(.*)', ['direct_message'], (bot, message) => {
   bot.api.users.info({user: message.user}, (err, res) => {
     if (err) console.log(err)
     let subject = message.text

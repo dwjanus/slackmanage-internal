@@ -14,8 +14,8 @@ const pgConfig = {
   port: params.port,
   database: params.pathname.split('/')[1],
   max: 20,
-  ssl: true,
-  idleTimeoutMillis: 3000 // 2s idle timeout for clients
+  ssl: true
+  // idleTimeoutMillis: 2000 // 2s idle timeout for clients
 }
 const pool = new Pool(pgConfig)
 
@@ -34,9 +34,15 @@ module.exports.createCase = (subject, user, description, cb) => {
     console.log('~ listening to status ~')
     client.on('notification', data => {
       console.log(data.payload)
+      client.release()
       cb(null, data.payload)
     })
+    .then(client => {
+      client.query('UNLISTEN status')
+      client.release()
+    })
     .catch(err => {
+      client.release()
       cb(err, null)
     })
   })
