@@ -36,12 +36,12 @@ module.exports.createCase = (subject, user, description, cb) => {
       console.log('-- client released, calling back results --')
       cb(null, data.payload)
     })
-    .then(client => {
-      console.log('-- client released unlistening now... --')
-      client.query('UNLISTEN status')
-      client.release()
-      console.log('-- client released --')
-    })
+    // .then(client => {
+    //   console.log('-- client released unlistening now... --')
+    //   client.query('UNLISTEN status')
+    //   client.release()
+    //   console.log('-- client released --')
+    // })
     .catch(err => {
       client.release()
       cb(err, null)
