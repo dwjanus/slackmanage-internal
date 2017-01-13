@@ -28,11 +28,11 @@ module.exports.createCase = (subject, user, description, cb) => {
     'values($1, $2, $3, $4, $5, $6, $7, $8);'
   let args = [subject, user, user, user, description, recordtypeid, 'Incident', 'Slack']
   pool.query(createQuery, args)
-  cb(pool.query('LISTEN status'))
-  // pool.on('notify_ready', res => {
-  //   console.log(util.inspect(res))
-  //   return cb(res)
-  // })
+  pool.query('LISTEN status')
+  pool.on('notify_ready', res => {
+    console.log(util.inspect(res))
+    cb(res)
+  })
 }
 
 // observer for status field

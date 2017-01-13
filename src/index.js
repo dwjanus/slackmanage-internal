@@ -102,15 +102,12 @@ controller.hears('(.*)', ['direct_message', 'direct_mention'], (bot, message) =>
     // })
     db.createCase(subject, user, description, (err, res) => {
       if (err) console.log(err)
-      res.on('notify_ready', msg => {
-        console.log(msg)
+      console.log('Create Case response:\n', util.inspect(res))
+      bot.reply(message, {
+        title: `Case: ${res.casenumber}`,
+        title_link: `https://cs3.salesforce.com./apex/SamanageESD__Incident?id=${res.sfid}`,
+        text: `Subject: ${subject}`
       })
-    //   console.log('Create Case response:\n', util.inspect(res))
-    //   bot.reply(message, {
-    //     title: `Case: ${res.casenumber}`,
-    //     title_link: `https://cs3.salesforce.com./apex/SamanageESD__Incident?id=${res.sfid}`,
-    //     text: `Subject: ${subject}`
-    //   })
     })
   })
 })
