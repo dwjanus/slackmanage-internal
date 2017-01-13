@@ -106,7 +106,7 @@ controller.hears('(.*)', ['direct_message', 'direct_mention'], (bot, message) =>
       bot.reply(message, {
         title: `Case: ${res.casenumber}`,
         title_link: `https://cs3.salesforce.com./apex/SamanageESD__Incident?id=${res.sfid}`,
-        text: `Subject: ${subject}`
+        text: `Subject: ${res.subject}`
       })
     })
   })
