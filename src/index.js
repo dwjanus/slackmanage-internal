@@ -105,12 +105,15 @@ controller.hears('(.*)', ['direct_message', 'direct_mention'], (bot, message) =>
       if (err) console.log(err)
       console.log('~ inside of createCase ~')
       console.log('--> Create Case response:\n', util.inspect(res))
-      bot.reply(message, {
-        title: `Case: ${res.casenumber}`,
-        title_link: `https://cs3.salesforce.com./apex/SamanageESD__Incident?id=${res.sfid}`,
-        text: `Subject: ${res.subject}`
+      db.retrieveCase(res.payload, (err, res) => {
+        if (err) console.log(err)
+        bot.reply(message, {
+          title: `Case: ${res.casenumber}`,
+          title_link: `https://cs3.salesforce.com./apex/SamanageESD__Incident?id=${res.sfid}`,
+          text: `Subject: ${res.subject}`
+        })
+        console.log('~ create case finished ~')
       })
-      console.log('~ create case finished ~')
     })
   })
 })

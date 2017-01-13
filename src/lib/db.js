@@ -51,6 +51,17 @@ module.exports.createCase = (subject, user, description, cb) => {
   })
 }
 
+module.exports.retrieveCase = (sfid, cb) => {
+  let retrieveQuery = `SELECT * FROM salesforcesandbox.case WHERE sfid = '${sfid}'`
+  pool.query(retrieveQuery, [], (err, result) => {
+    if (err) {
+      cb(err, null)
+      return
+    }
+    cb(null, result.rows[0])
+  })
+}
+
 // observer for status field
 // async function observe (subject) {
 //   try {
@@ -103,13 +114,4 @@ module.exports.createCase = (subject, user, description, cb) => {
 //   })
 //   // observe(subject)
 //   // return cb(pool.query(createQuery, args))
-// }
-
-// module.exports.retrieveCase = (subject, cb) => {
-//   let retrieveQuery = `SELECT * FROM salesforcesandbox.case WHERE subject = '${subject}'`
-//   return pool.query(retrieveQuery, [], (err, result) => {
-//     if (err) cb(err)
-//     cb(null, result.rows[0])
-//   })
-//   // return cb(pool.query(retrieveQuery, []))
 // }
