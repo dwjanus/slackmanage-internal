@@ -54,7 +54,7 @@ module.exports.retrieveCase = (sfid, cb) => {
       cb(err, null)
       return
     }
-    console.log('Retrieve Case result:\n', util.insepct(result))
+    console.log('Retrieve Case result:\n', util.inspect(result))
     cb(null, result.rows[0])
   })
 }
@@ -93,22 +93,3 @@ module.exports.retrieveCase = (sfid, cb) => {
 //   }
 // }
 
-// module.exports.query = (text, values) => {
-//   return pool.query(text, values)
-// }
-
-// module.exports.createCase = (subject, user, description, cb) => {
-//   let recordtypeid = '01239000000EB4NAAW'
-//   let createQuery = 'INSERT INTO salesforcesandbox.case(subject, ' +
-//     'creatorname, samanageesd__creatorname__c, samanageesd__requestername__c, ' +
-//     'description, recordtypeid, samanageesd__recordtype__c, origin) ' +
-//     'values($1, $2, $3, $4, $5, $6, $7, $8);'
-//   let args = [subject, user, user, user, description, recordtypeid, 'Incident', 'Slack']
-//   return pool.query(createQuery, args, (err, result) => {
-//     if (err) cb(err)
-//     observe(subject)
-//     cb(null, result.rows[0])
-//   })
-//   // observe(subject)
-//   // return cb(pool.query(createQuery, args))
-// }
