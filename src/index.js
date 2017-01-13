@@ -1,4 +1,5 @@
 
+import pg from 'pg'
 import http from 'http'
 import util from 'util'
 import Botkit from 'botkit'

@@ -15,10 +15,16 @@ const pgConfig = {
   host: params.hostname,
   port: params.port,
   database: params.pathname.split('/')[1],
-  max: 10,
-  ssl: true
+  max: 20,
+  ssl: true,
+  idleTimeoutMillis: 6000 // 6s timeout for clients
 }
 const pool = new Pool(pgConfig)
+
+pool.on('error', (err, client) => {
+  console.log(err)
+  client.release()
+})
 
 module.exports.createCase = (subject, user, description, cb) => {
   let recordtypeid = '01239000000EB4NAAW'
@@ -28,12 +34,20 @@ module.exports.createCase = (subject, user, description, cb) => {
     'values($1, $2, $3, $4, $5, $6, $7, $8);'
   let args = [subject, user, user, user, description, recordtypeid, 'Incident', 'Slack']
   pool.query(createQuery, args)
-  pool.query('LISTEN status;')
-  console.log(' -- after query listener --')
-  pool.on('notifification', (msg) => {
-    console.log('~ notify ready fired ~')
-    console.log('--> notification message: ', util.inspect(msg))
-    return cb(null, msg.payload)
+  console.log('~ Case created ~')
+  pool.connect().then(client => {
+    console.log('~ client acquired from pool ~')
+    client.query('LISTEN status')
+    console.log('~ listening to status ~')
+    client.on('notification', data => {
+      console.log(data.payload)
+      client.release()
+      cb(null, data.payload)
+    })
+    .catch(err => {
+      client.release()
+      cb(err, null)
+    })
   })
 }
 
