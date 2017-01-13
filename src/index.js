@@ -95,9 +95,15 @@ controller.hears('(.*)', ['direct_message', 'direct_mention'], (bot, message) =>
         if (err) console.log(err)
         console.log('App-level Retrieval result: ' + util.inspect(result))
         bot.reply(message, {
-          title: `Success! - click to view your case:`,
-          title_link: `https://cs60.salesforce.com./apex/SamanageESD__Incident?id=${result.sfid}`,
-          text: `${result.subject}`
+          text: `Success!`,
+          attachments: [
+            {
+              title: `Case: ${result.casenumber}`,
+              title_link: `https://cs60.salesforce.com./apex/SamanageESD__Incident?id=${result.sfid}`,
+              text: `${result.subject}`,
+              color: '#0067B3'
+            }
+          ]
         })
         console.log('~ create case finished ~')
       })
