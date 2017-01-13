@@ -109,7 +109,7 @@ controller.hears('(.*)', ['direct_message', 'direct_mention'], (bot, message) =>
         if (err) console.log(err)
         bot.reply(message, {
           title: `Case: ${result.casenumber}`,
-          title_link: `https://cs3.salesforce.com./apex/SamanageESD__Incident?id=${result.sfid}`,
+          title_link: `https://cs60.salesforce.com./apex/SamanageESD__Incident?id=${result.sfid}`,
           text: `Subject: ${result.subject}`
         })
         console.log('~ create case finished ~')
