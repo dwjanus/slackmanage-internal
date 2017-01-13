@@ -3,8 +3,6 @@ import Pool from 'pg-pool'
 import util from 'util'
 import url from 'url'
 import config from './config.js'
-// import PgQueryObserver from 'pg-query-observer'
-// const pgp = require('pg-promise')()
 
 // config for pool
 const params = url.parse(config('DATABASE_URL'))
@@ -17,7 +15,7 @@ const pgConfig = {
   database: params.pathname.split('/')[1],
   max: 20,
   ssl: true,
-  idleTimeoutMillis: 5000 // 5s timeout for clients
+  idleTimeoutMillis: 2000 // 2s idle timeout for clients
 }
 const pool = new Pool(pgConfig)
 
@@ -36,11 +34,9 @@ module.exports.createCase = (subject, user, description, cb) => {
     console.log('~ listening to status ~')
     client.on('notification', data => {
       console.log(data.payload)
-      client.release()
       cb(null, data.payload)
     })
     .catch(err => {
-      client.release()
       cb(err, null)
     })
   })
@@ -58,38 +54,3 @@ module.exports.retrieveCase = (sfid, cb) => {
     cb(null, result.rows[0])
   })
 }
-
-// observer for status field
-// async function observe (subject) {
-//   try {
-//     let db = await pgp(config('DATABASE_URL'))
-//     let queryObserver = new PgQueryObserver(db, 'status')
-//     console.log('- Observing client now')
-
-//     function triggers (change) {
-//       console.log('- triggers', change)
-//       return true
-//     }
-
-//     async function cleanupAndExit () {
-//       await queryObserver.cleanup()
-//       process.exit()
-//     }
-
-//     process.on('SIGTERM', cleanupAndExit)
-//     process.on('SIGINT', cleanupAndExit)
-
-//     let query = `SELECT * FROM salesforcesandbox.case WHERE subject = '${subject}'`
-//     let params = []
-//     let handle = await queryObserver.notify(query, params, triggers, diff => {
-//       console.log('** QUERY NOTIFICATION: ', util.insepct(diff))
-//     })
-
-//     console.log('- handler rows:\n', handle.rows)
-//     // await handle.stop()
-//     // await queryObserver.cleanup()
-//   } catch (err) {
-//     console.error(err)
-//   }
-// }
-
