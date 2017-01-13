@@ -28,21 +28,14 @@ module.exports.createCase = (subject, user, description, cb) => {
     'values($1, $2, $3, $4, $5, $6, $7, $8);'
   let args = [subject, user, user, user, description, recordtypeid, 'Incident', 'Slack']
   pool.query(createQuery, args)
-  pool.query('LISTEN status;', (err, res) => {
-    if (err) console.log(err)
-    console.log(' ~ inside listener ~')
-    console.log('response:\n', util.inspect(res))
-    console.log('response.rows:\n', util.inspect(res.rows))
-    console.log('response.fields:\n', util.inspect(res.fields))
-    cb(res)
-  })
+  pool.query('LISTEN status;')
   console.log(' -- after query listener --')
-  // pool.on('notify_ready', (err, msg) => {
-  //   if (err) console.log(err)
-  //   console.log('~ notify ready fired ~')
-  //   console.log('--> notification message: ', util.inspect(msg))
-  //   return cb(null, msg)
-  // })
+  pool.on('notifification', (err, msg) => {
+    if (err) console.log(err)
+    console.log('~ notify ready fired ~')
+    console.log('--> notification message: ', util.inspect(msg))
+    return cb(null, msg)
+  })
 }
 
 // observer for status field
