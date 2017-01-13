@@ -31,7 +31,10 @@ module.exports.createCase = (subject, user, description, cb) => {
   pool.query('LISTEN status;', (err, res) => {
     if (err) console.log(err)
     console.log(' ~ inside listener ~')
-    console.log(util.inspect(res))
+    console.log('response:\n', util.inspect(res))
+    console.log('response.rows:\n', util.inspect(res.rows))
+    console.log('response.fields:\n', util.inspect(res.fields))
+    cb(res)
   })
   console.log(' -- after query listener --')
   // pool.on('notify_ready', (err, msg) => {
