@@ -90,7 +90,7 @@ controller.hears('(.*)', ['direct_message'], (bot, message) => {
 
     db.createCase(subject, user, description, (err, result) => {
       if (err) console.log(err)
-      bot.say('Creating your ticket now...')
+      bot.reply(message, 'Creating your ticket now...')
       console.log('App-level Retrieval result: ' + util.inspect(result))
       bot.reply(message, {
         text: `Success!`,
