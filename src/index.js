@@ -37,7 +37,7 @@ controller.spawn({
       var total = response.members.length
       for (var i = 0; i < total; i++) {
         var member = response.members[i]
-        fullTeamList.push({id: member.id, name: member.name})
+        fullTeamList.push({id: member.id, name: member.name, fullName: member.real_name})
       }
     }
   })
@@ -106,7 +106,7 @@ controller.hears('^stop', 'direct_message', (bot, message) => {
 })
 
 controller.hears('(^hello$)', 'direct_message', (bot, message) => {
-  let userTest = _.find(fullTeamList, { id: message.user })
+  let userTest = _.find(fullTeamList, { id: message.user }).real_name
   console.log('User Test: ' + util.inspect(userTest))
   bot.say(message, 'Hello')
 })
