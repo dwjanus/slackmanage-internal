@@ -1,7 +1,7 @@
 
 import http from 'http'
-import util from 'util'
 import _ from 'lodash'
+import util from 'util'
 import Botkit from 'botkit'
 import db from './lib/db.js'
 import config from './lib/config.js'
@@ -22,10 +22,37 @@ const controller = Botkit.slackbot({
   interactive_replies: true
 })
 
+const fullTeamList = []
+const fullChannelList = []
+
 controller.spawn({
   token: config('SLACK_TOKEN')
-}).startRTM((err) => {
+}).startRTM((err, bot) => {
   if (err) throw new Error(err)
+
+  // @ https://api.slack.com/methods/users.list
+  bot.api.users.list({}, (err, response) => {
+    if (err) console.log(err)
+    if (response.hasOwnProperty('members') && response.ok) {
+      var total = response.members.length
+      for (var i = 0; i < total; i++) {
+        var member = response.members[i]
+        fullTeamList.push({id: member.id, name: member.name})
+      }
+    }
+  })
+
+  // @ https://api.slack.com/methods/channels.list
+  bot.api.channels.list({}, (err, response) => {
+    if (err) console.log(err)
+    if (response.hasOwnProperty('channels') && response.ok) {
+      var total = response.channels.length
+      for (var i = 0; i < total; i++) {
+        var channel = response.channels[i]
+        fullChannelList.push({id: channel.id, name: channel.name})
+      }
+    }
+  })
 })
 
 /*************************************************************************************************/
@@ -39,7 +66,7 @@ controller.setupWebserver(port, (err, webserver) => {
   })
 })
 
-/*************************************************************************************************/
+/*************************************************************************************************/  
 
 controller.hears(['(^help$)'], ['direct_message', 'direct_mention'], (bot, message) => {
   let attachments = [
@@ -79,7 +106,17 @@ controller.hears('^stop', 'direct_message', (bot, message) => {
 })
 
 controller.hears('(^hello$)', 'direct_message', (bot, message) => {
-  bot.say('Hello')
+  let userTest = fullTeamList.message.user
+  console.log('User Test: ' + util.inspect(userTest))
+  bot.say(message, 'Hello')
+})
+
+controller.hears('(^channels$)', 'direct_message', (bot, message) => {
+  bot.reply(message, _.toString(fullChannelList))
+})
+
+controller.hears('(^users$)', 'direct_message', (bot, message) => {
+  bot.reply(message, _.toString(fullTeamList))
 })
 
 // ~ ~ * ~ ~ ~ * * ~ ~ ~ ~ * * * ~ ~ ~ ~ ~ * * * ~ ~ ~ ~ * * ~ ~ ~ * * ~ ~ ~ * * ~ ~ ~ * ~ ~ ~ * ~ ~ * ~ ~ //
@@ -91,7 +128,6 @@ controller.hears('(.*)', ['direct_message'], (bot, message) => {
     let subject = message.text
     let user = res.user.profile.real_name
     let description = `Automated incident creation via HAL9000 slackbot for: ${res.user.profile.real_name} ~ Slack Id: ${message.user}`
-
     db.createCase(subject, user, description, (err, result) => {
       if (err) console.log(err)
       bot.reply(message, {
