@@ -19,6 +19,18 @@ const pgConfig = {
 }
 const pool = new Pool(pgConfig)
 
+function retrieveCase (sfid, cb) {
+  let retrieveQuery = `SELECT * FROM salesforcesandbox.case WHERE sfid = '${sfid}'`
+  pool.query(retrieveQuery, [], (err, result) => {
+    if (err) {
+      cb(err, null)
+      return
+    }
+    console.log('Retrieve Case result:\n', util.inspect(result[0]))
+    cb(null, result.rows[0])
+  })
+}
+
 module.exports.createCase = (subject, user, description, cb) => {
   let recordtypeid = '01239000000EB4NAAW'
   let createQuery = 'INSERT INTO salesforcesandbox.case(subject, ' +
@@ -34,23 +46,12 @@ module.exports.createCase = (subject, user, description, cb) => {
       console.log('-- notification fired, data.payload:\n', data.payload)
       client.release()
       console.log('-- client released, calling back results --')
-      cb(null, data.payload)
+      // cb(null, data.payload)
+      retrieveCase(data.payload, cb)
     })
     .catch(err => {
       client.release()
       cb(err, null)
     })
-  })
-}
-
-module.exports.retrieveCase = (sfid, cb) => {
-  let retrieveQuery = `SELECT * FROM salesforcesandbox.case WHERE sfid = '${sfid}'`
-  pool.query(retrieveQuery, [], (err, result) => {
-    if (err) {
-      cb(err, null)
-      return
-    }
-    console.log('Retrieve Case result:\n', util.inspect(result))
-    cb(null, result.rows[0])
   })
 }

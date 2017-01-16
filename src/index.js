@@ -88,26 +88,21 @@ controller.hears('(.*)', ['direct_message'], (bot, message) => {
     let user = res.user.profile.real_name
     let description = `Automated incident creation via HAL9000 slackbot for: ${res.user.profile.real_name} ~ Slack Id: ${message.user}`
 
-    db.createCase(subject, user, description, (err, res) => {
+    db.createCase(subject, user, description, (err, result) => {
       if (err) console.log(err)
-      console.log('--> Create Case response: ', util.inspect(res))
-      bot.reply(message, {text: 'Creating your case now...'})
-      db.retrieveCase(res, (err, result) => {
-        if (err) console.log(err)
-        console.log('App-level Retrieval result: ' + util.inspect(result))
-        bot.reply(message, {
-          text: `Success!`,
-          attachments: [
-            {
-              title: `Case: ${result.casenumber}`,
-              title_link: `https://cs60.salesforce.com./apex/SamanageESD__Incident?id=${result.sfid}`,
-              text: `${result.subject}`,
-              color: '#0067B3'
-            }
-          ]
-        })
-        console.log('~ create case finished ~')
+      console.log('App-level Retrieval result: ' + util.inspect(result))
+      bot.reply(message, {
+        text: `Success!`,
+        attachments: [
+          {
+            title: `Case: ${result.casenumber}`,
+            title_link: `https://cs60.salesforce.com./apex/SamanageESD__Incident?id=${result.sfid}`,
+            text: `${result.subject}`,
+            color: '#0067B3'
+          }
+        ]
       })
+      console.log('~ create case finished ~')
     })
   })
 })
