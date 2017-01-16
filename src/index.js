@@ -37,7 +37,6 @@ controller.spawn({
       var total = response.members.length
       for (var i = 0; i < total; i++) {
         var member = response.members[i]
-        console.log(util.inspect(member))
         fullTeamList.push({id: member.id, name: member.name, fullName: member.real_name})
       }
     }
@@ -109,7 +108,7 @@ controller.hears('^stop', 'direct_message', (bot, message) => {
 controller.hears('(^hello$)', 'direct_message', (bot, message) => {
   let userTest = _.find(fullTeamList, { id: message.user }).fullName
   console.log('User Test: ' + util.inspect(userTest))
-  bot.say(message, 'Hello')
+  bot.reply(message, 'Hello')
 })
 
 controller.hears('(^channels$)', 'direct_message', (bot, message) => {
@@ -124,24 +123,21 @@ controller.hears('(^users$)', 'direct_message', (bot, message) => {
 
 // Handler for case creation
 controller.hears('(.*)', ['direct_message'], (bot, message) => {
-  bot.api.users.info({user: message.user}, (err, res) => {
+  let user = _.find(fullTeamList, { id: message.user }).fullName
+  let subject = message.text
+  let description = `Automated incident creation for: ${user} ~ sent from Slack via HAL 9000`
+  db.createCase(subject, user, description, (err, result) => {
     if (err) console.log(err)
-    let subject = message.text
-    let user = res.user.profile.real_name
-    let description = `Automated incident creation via HAL9000 slackbot for: ${res.user.profile.real_name} ~ Slack Id: ${message.user}`
-    db.createCase(subject, user, description, (err, result) => {
-      if (err) console.log(err)
-      bot.reply(message, {
-        text: `Success!`,
-        attachments: [
-          {
-            title: `Case: ${result.casenumber}`,
-            title_link: `https://cs60.salesforce.com./apex/SamanageESD__Incident?id=${result.sfid}`,
-            text: `${result.subject}`,
-            color: '#0067B3'
-          }
-        ]
-      })
+    bot.reply(message, {
+      text: `Success!`,
+      attachments: [
+        {
+          title: `Case: ${result.casenumber}`,
+          title_link: `https://cs60.salesforce.com./apex/SamanageESD__Incident?id=${result.sfid}`,
+          text: `${result.subject}`,
+          color: '#0067B3'
+        }
+      ]
     })
   })
 })

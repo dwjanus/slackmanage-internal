@@ -1,6 +1,5 @@
 
 import Pool from 'pg-pool'
-import util from 'util'
 import url from 'url'
 import config from './config.js'
 
@@ -21,9 +20,9 @@ const pool = new Pool(pgConfig)
 
 const recordtypeid = '01239000000EB4NAAW'
 const createQuery = 'INSERT INTO salesforcesandbox.case(subject, ' +
-      'creatorname, samanageesd__creatorname__c, samanageesd__requesteruser__c, ' +
+      'samanageesd__creatorname__c, samanageesd__requesteruser__c, ' +
       'description, recordtypeid, samanageesd__recordtype__c, origin) ' +
-      'values($1, $2, $3, $4, $5, $6, $7, $8);'
+      'values($1, $2, $3, $4, $5, $6, $7);'
 
 function retrieveCase (sfid, cb) {
   let retrieveQuery = `SELECT * FROM salesforcesandbox.case WHERE sfid = '${sfid}'`
@@ -37,7 +36,7 @@ module.exports.createCase = (subject, user, description, cb) => {
   pool.query(`SELECT sfid FROM salesforcesandbox.user WHERE name ='${user}'`, (err, res) => {
     if (err) console.log(err)
     let userId = res.rows[0].sfid
-    let args = [subject, user, user, userId, description, recordtypeid, 'Incident', 'Slack']
+    let args = [subject, user, userId, description, recordtypeid, 'Incident', 'Slack']
     pool.query(createQuery, args)
     console.log('~ Case created ~')
     pool.connect().then(client => {
