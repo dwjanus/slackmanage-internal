@@ -78,6 +78,10 @@ controller.hears('^stop', 'direct_message', (bot, message) => {
   bot.rtm.close()
 })
 
+controller.hears('^hello$,', 'direct_message', (bot, message) => {
+  bot.say('Hello')
+})
+
 // ~ ~ * ~ ~ ~ * * ~ ~ ~ ~ * * * ~ ~ ~ ~ ~ * * * ~ ~ ~ ~ * * ~ ~ ~ * * ~ ~ ~ * * ~ ~ ~ * ~ ~ ~ * ~ ~ * ~ ~ //
 
 // Handler for case creation
@@ -90,8 +94,6 @@ controller.hears('(.*)', ['direct_message'], (bot, message) => {
 
     db.createCase(subject, user, description, (err, result) => {
       if (err) console.log(err)
-      bot.reply(message, 'Creating your ticket now...')
-      console.log('App-level Retrieval result: ' + util.inspect(result))
       bot.reply(message, {
         text: `Success!`,
         attachments: [
@@ -103,7 +105,6 @@ controller.hears('(.*)', ['direct_message'], (bot, message) => {
           }
         ]
       })
-      console.log('~ create case finished ~')
     })
   })
 })
