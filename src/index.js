@@ -106,17 +106,17 @@ controller.hears('^stop', 'direct_message', (bot, message) => {
 })
 
 controller.hears('(^hello$)', 'direct_message', (bot, message) => {
-  let userTest = fullTeamList[message.user]
+  let userTest = _.find(fullTeamList, { id: message.user })
   console.log('User Test: ' + util.inspect(userTest))
   bot.say(message, 'Hello')
 })
 
 controller.hears('(^channels$)', 'direct_message', (bot, message) => {
-  bot.reply(message, _.toString(fullChannelList))
+  bot.reply(message, _.toString(util.inspect(fullChannelList)))
 })
 
 controller.hears('(^users$)', 'direct_message', (bot, message) => {
-  bot.reply(message, _.toString(fullTeamList))
+  bot.reply(message, _.toString(util.inspect(fullTeamList)))
 })
 
 // ~ ~ * ~ ~ ~ * * ~ ~ ~ ~ * * * ~ ~ ~ ~ ~ * * * ~ ~ ~ ~ * * ~ ~ ~ * * ~ ~ ~ * * ~ ~ ~ * ~ ~ ~ * ~ ~ * ~ ~ //
