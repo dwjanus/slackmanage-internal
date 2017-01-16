@@ -106,7 +106,7 @@ controller.hears('^stop', 'direct_message', (bot, message) => {
 })
 
 controller.hears('(^hello$)', 'direct_message', (bot, message) => {
-  let userTest = fullTeamList.message.user
+  let userTest = fullTeamList[message.user]
   console.log('User Test: ' + util.inspect(userTest))
   bot.say(message, 'Hello')
 })
