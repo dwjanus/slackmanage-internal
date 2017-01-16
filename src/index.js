@@ -85,7 +85,7 @@ controller.hears('(.*)', ['direct_message'], (bot, message) => {
   bot.api.users.info({user: message.user}, (err, res) => {
     if (err) console.log(err)
     let subject = message.text
-    let user = _.toString(res.user.profile.real_name)
+    let user = res.user.profile.real_name
     let description = `Automated incident creation via HAL9000 slackbot for: ${res.user.profile.real_name} ~ Slack Id: ${message.user}`
 
     db.createCase(subject, user, description, (err, result) => {
