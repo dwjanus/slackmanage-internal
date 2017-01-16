@@ -78,7 +78,7 @@ controller.hears('^stop', 'direct_message', (bot, message) => {
   bot.rtm.close()
 })
 
-controller.hears('^hello$,', 'direct_message', (bot, message) => {
+controller.hears('(^hello$)', 'direct_message', (bot, message) => {
   bot.say('Hello')
 })
 
