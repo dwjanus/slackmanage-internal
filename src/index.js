@@ -91,6 +91,7 @@ controller.hears('(.*)', ['direct_message'], (bot, message) => {
     db.createCase(subject, user, description, (err, res) => {
       if (err) console.log(err)
       console.log('--> Create Case response: ', util.inspect(res))
+      bot.reply(message, {text: 'Creating your case now...'})
       db.retrieveCase(res, (err, result) => {
         if (err) console.log(err)
         console.log('App-level Retrieval result: ' + util.inspect(result))
