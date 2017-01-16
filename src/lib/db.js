@@ -56,10 +56,10 @@ function retrieveCase (sfid, cb) {
 // }
 
 module.exports.createCase = (subject, user, description, cb) => {
-  pool.query(`SELECT Id FROM salesforcesandbox.user WHERE name ='${user}'`, (err, res) => {
+  pool.query(`SELECT sfid FROM salesforcesandbox.user WHERE name ='${user}'`, (err, res) => {
     if (err) console.log(err)
     console.log('User search response:\n' + util.inspect(res.rows[0]))
-    let userId = res.rows[0].id
+    let userId = res.rows[0].sfid
     let recordtypeid = '01239000000EB4NAAW'
     let createQuery = 'INSERT INTO salesforcesandbox.case(subject, ' +
       'creatorname, samanageesd__creatorname__c, samanageesd__requesteruser__c, ' +
