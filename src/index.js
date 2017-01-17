@@ -161,10 +161,9 @@ controller.hears('(.*)', ['direct_message'], (bot, message) => {
   //     ]
   //   })
   // })
-  let newcase = create(subject, user, description)
-  console.log('Result from awaited function:\n', util.inspect(newcase))
+
   // here we would queue the listener for the status change of the case with (sfid)
-  bot.reply(message, newcase)
+  bot.reply(message, create(subject, user, description))
 })
 
 // Handler for interractive message buttons
