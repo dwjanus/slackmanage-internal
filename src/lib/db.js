@@ -31,10 +31,10 @@ function retrieveCase (sfid) {
   db.one(retrieveQuery)
     .then(data => {
       console.log(`~ 7. DB.one finished -> data:\n${util.inspect(data)} ~`)
-      return Promise.resolve(data)
+      return data
     })
     .catch(err => {
-      return Promise.reject(err)
+      return err
     })
 }
 
@@ -48,35 +48,31 @@ module.exports.createCase = (subject, user, description) => {
       let args = [subject, user, userId.sfid, description, recordtypeid, 'Incident', 'Slack']
       return t.none(createQuery, args)
     })
-    .then(() => {
-      console.log('--> Done with tasks - awaiting listener')
-      console.log(`~ 3. DB.task.(second)then ~`)
-      let sco
-      db.connect()
-      .then(obj => {
-        console.log(`~ 4. DB.connect.then ~`)
-        sco = obj
-        sco.client.on('notification', data => {
-          console.log('--> Recieved trigger data: ', data.payload)
-          return retrieveCase(data.payload)
-        })
-        return sco.none('LISTEN status')
-      })
-      .catch(err => {
-        console.log(err)
-      })
-      .finally(() => {
-        console.log(`~ 5. DB.connect.finally ~`)
-        if (sco) {
-          console.log(`~ 6. sco still exists - calling .done() ~`)
-          sco.done()
-        }
-      })
-    })
   })
-  .then(events => {
-    console.log(`~ 9 events: ${util.inspect(events)}`)
-    return events
+  .then(() => {
+    console.log('--> Done with tasks - awaiting listener')
+    console.log(`~ 3. DB.task.(second)then ~`)
+    let sco
+    db.connect()
+    .then(obj => {
+      console.log(`~ 4. DB.connect.then ~`)
+      sco = obj
+      sco.client.on('notification', data => {
+        console.log('--> Recieved trigger data: ', data.payload)
+        return retrieveCase(data.payload)
+      })
+      return sco.none('LISTEN status')
+    })
+    .catch(err => {
+      console.log(err)
+    })
+    .finally(() => {
+      console.log(`~ 5. DB.connect.finally ~`)
+      if (sco) {
+        console.log(`~ 6. sco.done() ~`)
+        sco.done()
+      }
+    })
   })
   .catch(err => {
     console.log(err)
