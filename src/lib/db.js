@@ -17,7 +17,7 @@ const pgConfig = {
   host: params.hostname,
   port: params.port,
   ssl: true,
-  poolIdleTimeout: 3000
+  poolIdleTimeout: 5000
 }
 const db = pgp(pgConfig)
 const recordtypeid = '01239000000EB4NAAW'
@@ -51,25 +51,25 @@ module.exports.createCase = (subject, user, description) => {
       .then(() => {
         console.log('--> Done with tasks - awaiting listener')
         console.log(`~ 3. DB.task.(second)then ~`)
-        // let sco
+        let sco
         db.connect()
         .then(obj => {
           console.log(`~ 4. DB.connect.then ~`)
-          t = obj
-          t.client.on('notification', data => {
+          sco = obj
+          sco.client.on('notification', data => {
             console.log('--> Recieved trigger data: ', data.payload)
             return retrieveCase(data.payload)
           })
-          return t.none('LISTEN status')
+          return sco.none('LISTEN status')
         })
         .catch(err => {
           console.log(err)
         })
         .finally(() => {
           console.log(`~ 5. DB.connect.finally ~`)
-          if (t) {
+          if (sco) {
             console.log(`~ 6. sco.done() ~`)
-            t.done()
+            sco.done()
           }
         })
       })
