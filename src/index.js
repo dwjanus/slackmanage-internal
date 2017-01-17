@@ -7,7 +7,7 @@ import config from './lib/config.js'
 import db from './lib/db.js'
 import Promise from 'bluebird'
 
-Promise.promisify(db.createCase)
+const createCase = Promise.promisify(db.createCase)
 
 // Simple hack to ping server every 5min and keep app running
 setInterval(() => {
@@ -143,7 +143,7 @@ controller.hears('(.*)', ['direct_message'], (bot, message) => {
   //     ]
   //   })
   // })
-  db.createCase(subject, user, description).then(result => {
+  createCase(subject, user, description).then(result => {
     console.log(`~ 8. finished waiting for createCase, result:\n${util.inspect(result)}`)
     let response = {
       text: `Success!`,
