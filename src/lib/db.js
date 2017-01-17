@@ -26,12 +26,12 @@ const createQuery = 'INSERT INTO salesforcesandbox.case(subject, ' +
       'values($1, $2, $3, $4, $5, $6, $7)'
 
 function retrieveCase (sfid) {
-  console.log('~ retrieveCase function ~')
+  console.log('--> retrieveCase function ~')
   let retrieveQuery = `SELECT * FROM salesforcesandbox.case WHERE sfid = '${sfid}'`
   db.one(retrieveQuery)
   .then(data => {
-    console.log(`~ DB.one finished -> data:\n${util.inspect(data)} ~`)
-    return Promise.resolve(data)
+    console.log(`~ 7. DB.one finished -> data:\n${util.inspect(data)} ~`)
+    return data
   })
   .catch(err => {
     console.log(err)
@@ -59,18 +59,17 @@ module.exports.createCase = (subject, user, description) => {
       sco = obj
       sco.client.on('notification', data => {
         console.log('--> Recieved trigger data: ', data.payload)
-        retrieveCase(data.payload)
+        return retrieveCase(data.payload)
       })
-      console.log(`~ About to return sco.none LISTEN status ~`)
       return sco.none('LISTEN status')
     })
     .catch(err => {
       console.log(err)
     })
     .finally(() => {
-      console.log(`~ DB.connect.finally ~`)
+      console.log(`~ 5. DB.connect.finally ~`)
       if (sco) {
-        console.log(`~ sco still exists - calling .done() ~`)
+        console.log(`~ 6. sco still exists - calling .done() ~`)
         sco.done()
       }
     })
