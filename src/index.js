@@ -143,21 +143,25 @@ controller.hears('(.*)', ['direct_message'], (bot, message) => {
   //     ]
   //   })
   // })
-  createCase(subject, user, description).then(result => {
-    console.log(`~ 8. finished waiting for createCase, result:\n${util.inspect(result)}`)
-    let response = {
-      text: `Success!`,
-      attachments: [
-        {
-          title: `Case: ${result.casenumber}`,
-          title_link: `https://cs60.salesforce.com./apex/SamanageESD__Incident?id=${result.sfid}`,
-          text: `${result.subject}`,
-          color: '#0067B3'
-        }
-      ]
-    }
-    // here we would queue the listener for the status change of the case with (sfid)
-    bot.reply(message, response)
+  createCase(subject, user, description)
+    .then(result => {
+      console.log(`~ 8. finished waiting for createCase, result:\n${util.inspect(result)}`)
+      let response = {
+        text: `Success!`,
+        attachments: [
+          {
+            title: `Case: ${result.casenumber}`,
+            title_link: `https://cs60.salesforce.com./apex/SamanageESD__Incident?id=${result.sfid}`,
+            text: `${result.subject}`,
+            color: '#0067B3'
+          }
+        ]
+      }
+      // here we would queue the listener for the status change of the case with (sfid)
+      bot.reply(message, response)
+    })
+  .catch(err => {
+    console.log(err)
   })
 })
 

@@ -28,17 +28,14 @@ const createQuery = 'INSERT INTO salesforcesandbox.case(subject, ' +
 function retrieveCase (sfid) {
   console.log('--> retrieveCase function')
   let retrieveQuery = `SELECT * FROM salesforcesandbox.case WHERE sfid = '${sfid}'`
-  return new Promise((resolve, reject) => {
-    try {
-      db.one(retrieveQuery)
-      .then(data => {
-        console.log(`~ 7. DB.one finished -> data:\n${util.inspect(data)} ~`)
-        resolve(data)
-      })
-    } catch (err) {
-      reject(err)
-    }
-  })
+  db.one(retrieveQuery)
+    .then(data => {
+      console.log(`~ 7. DB.one finished -> data:\n${util.inspect(data)} ~`)
+      return Promise.resolve(data)
+    })
+    .catch(err => {
+      return Promise.reject(err)
+    })
 }
 
 module.exports.createCase = (subject, user, description) => {
