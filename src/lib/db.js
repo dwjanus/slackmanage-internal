@@ -1,10 +1,10 @@
 
-import promise from 'bluebird'
+import Promise from 'bluebird'
 import url from 'url'
 import util from 'util'
 import config from './config.js'
 let pgp = require('pg-promise')({
-  promiseLib: promise
+  promiseLib: Promise
 })
 
 // config for pool
@@ -28,13 +28,16 @@ const createQuery = 'INSERT INTO salesforcesandbox.case(subject, ' +
 function retrieveCase (sfid) {
   console.log('--> retrieveCase function')
   let retrieveQuery = `SELECT * FROM salesforcesandbox.case WHERE sfid = '${sfid}'`
-  db.one(retrieveQuery)
-  .then(data => {
-    console.log(`~ 7. DB.one finished -> data:\n${util.inspect(data)} ~`)
-    return data
-  })
-  .catch(err => {
-    console.log(err)
+  return new Promise((resolve, reject) => {
+    try {
+      db.one(retrieveQuery)
+      .then(data => {
+        console.log(`~ 7. DB.one finished -> data:\n${util.inspect(data)} ~`)
+        resolve(data)
+      })
+    } catch (err) {
+      reject(err)
+    }
   })
 }
 
