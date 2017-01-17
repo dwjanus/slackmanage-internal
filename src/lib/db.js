@@ -25,7 +25,7 @@ const createQuery = 'INSERT INTO salesforcesandbox.case(subject, ' +
       'description, recordtypeid, samanageesd__recordtype__c, origin) ' +
       'values($1, $2, $3, $4, $5, $6, $7)'
 
-function retrieveCase (sfid) {
+const retrieveCase = Promise.method((sfid) => {
   console.log('--> retrieveCase function')
   let retrieveQuery = `SELECT * FROM salesforcesandbox.case WHERE sfid = '${sfid}'`
   return db.one(retrieveQuery)
@@ -34,9 +34,9 @@ function retrieveCase (sfid) {
       return data
     })
     .catch(err => {
-      return err
+      console.log(err)
     })
-}
+})
 
 module.exports.createCase = (subject, user, description) => {
   console.log('--> createCase function')
