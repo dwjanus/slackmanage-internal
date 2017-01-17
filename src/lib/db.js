@@ -45,7 +45,7 @@ module.exports.createCase = (subject, user, description) => {
     console.log('~ DB.task ~')
     return t.one(`SELECT sfid FROM salesforcesandbox.user WHERE name = $1`, user)
     .then(userId => {
-      console.log(`~ DB.task.then -> userId: ${util.inspect(userId)} ~`)
+      console.log(`~ DB.task.then -> userId: ${util.inspect(userId.sfid)} ~`)
       let args = [subject, user, userId.sfid, description, recordtypeid, 'Incident', 'Slack']
       return t.none(createQuery, args)
     })
