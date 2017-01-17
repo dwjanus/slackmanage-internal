@@ -8,20 +8,22 @@ import db from './lib/db.js'
 
 async function create (subject, user, description) {
   try {
-    console.log(`~ create function ~`)
-    let result = await db.createCase(subject, user, description)
-    let response = {
-      text: `Success!`,
-      attachments: [
-        {
-          title: `Case: ${result.casenumber}`,
-          title_link: `https://cs60.salesforce.com./apex/SamanageESD__Incident?id=${result.sfid}`,
-          text: `${result.subject}`,
-          color: '#0067B3'
-        }
-      ]
-    }
-    return response
+    console.log(`--> create function`)
+    await db.createCase(subject, user, description).then(result => {
+      console.log(`~ 8. finished waiting for createCase, result:\n${util.inspect(result)}`)
+      let response = {
+        text: `Success!`,
+        attachments: [
+          {
+            title: `Case: ${result.casenumber}`,
+            title_link: `https://cs60.salesforce.com./apex/SamanageESD__Incident?id=${result.sfid}`,
+            text: `${result.subject}`,
+            color: '#0067B3'
+          }
+        ]
+      }
+      return response
+    })
   } catch (err) {
     console.log(err)
   }

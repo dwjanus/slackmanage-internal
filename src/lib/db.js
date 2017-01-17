@@ -26,7 +26,7 @@ const createQuery = 'INSERT INTO salesforcesandbox.case(subject, ' +
       'values($1, $2, $3, $4, $5, $6, $7)'
 
 function retrieveCase (sfid) {
-  console.log('--> retrieveCase function ~')
+  console.log('--> retrieveCase function')
   let retrieveQuery = `SELECT * FROM salesforcesandbox.case WHERE sfid = '${sfid}'`
   db.one(retrieveQuery)
   .then(data => {
