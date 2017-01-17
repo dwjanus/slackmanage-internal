@@ -58,23 +58,23 @@ module.exports.createCase = (subject, user, description) => {
     .then(obj => {
       console.log(`~ 4. DB.connect.then ~`)
       sco = obj
-      sco.none('LISTEN status')
       sco.client.on('notification', data => {
         console.log('--> Recieved trigger data: ', data.payload)
+        sco.done()
         return retrieveCase(data.payload)
       })
-      // return sco.none('LISTEN status')
+      return sco.none('LISTEN status')
     })
     .catch(err => {
       console.log(err)
     })
-    .finally(() => {
-      console.log(`~ 5. DB.connect.finally ~`)
-      if (sco) {
-        console.log(`~ 6. sco.done() ~`)
-        sco.done()
-      }
-    })
+    // .finally(() => {
+    //   console.log(`~ 5. DB.connect.finally ~`)
+    //   if (sco) {
+    //     console.log(`~ 6. sco.done() ~`)
+    //     sco.done()
+    //   }
+    // })
   })
   .catch(err => {
     console.log(err)
