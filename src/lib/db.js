@@ -77,10 +77,6 @@ module.exports.createCase = (subject, user, description) => {
   .catch(err => {
     console.log(err)
   })
-  .finally(retrievedCase => {
-    console.log(`~ finally -> retrievedCase:\n${util.inspect(retrievedCase)}`)
-    return retrievedCase
-  })
 }
 
 // import Pool from 'pg-pool'
