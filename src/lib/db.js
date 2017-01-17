@@ -18,7 +18,6 @@ const pgConfig = {
   port: params.port,
   ssl: true
 }
-console.log('pgConfig:\n', util.inspect(pgConfig))
 const db = pgp(pgConfig)
 const recordtypeid = '01239000000EB4NAAW'
 const createQuery = 'INSERT INTO salesforcesandbox.case(subject, ' +
@@ -32,7 +31,7 @@ function retrieveCase (sfid) {
   db.one(retrieveQuery)
   .then(data => {
     console.log(`~ DB.one finished -> data:\n${util.inspect(data)} ~`)
-    return Promise.resolve(data.rows[0])
+    return Promise.resolve(data)
   })
   .catch(err => {
     console.log(err)
@@ -40,26 +39,26 @@ function retrieveCase (sfid) {
 }
 
 module.exports.createCase = (subject, user, description) => {
-  console.log('~ createCase function ~')
+  console.log('--> createCase function')
   db.task(t => {
-    console.log('~ DB.task ~')
+    console.log('~ 1. DB.task ~')
     return t.one(`SELECT sfid FROM salesforcesandbox.user WHERE name = $1`, user)
     .then(userId => {
-      console.log(`~ DB.task.then -> userId: ${util.inspect(userId.sfid)} ~`)
+      console.log(`~ 2. DB.task.then -> userId: ${util.inspect(userId.sfid)} ~`)
       let args = [subject, user, userId.sfid, description, recordtypeid, 'Incident', 'Slack']
       return t.none(createQuery, args)
     })
   })
   .then(events => {
-    console.log('Done with tasks - awaiting listener -\n', util.inspect(events))
-    console.log(`~ DB.task. second then ~`)
+    console.log('--> Done with tasks - awaiting listener')
+    console.log(`~ 3. DB.task.(second)then ~`)
     let sco
     db.connect()
     .then(obj => {
-      console.log(`~ DB.connect.then ~`)
+      console.log(`~ 4. DB.connect.then ~`)
       sco = obj
       sco.client.on('notification', data => {
-        console.log('Recieved trigger data: ', data)
+        console.log('--> Recieved trigger data: ', data.payload)
         retrieveCase(data.payload)
       })
       console.log(`~ About to return sco.none LISTEN status ~`)
