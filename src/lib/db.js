@@ -75,9 +75,6 @@ module.exports.createCase = (subject, user, description) => {
       })
     })
   })
-  .then(data => {
-    console.log(`Data from outermost then:\n${util.inspect(data)}`)
-  })
   .catch(err => {
     console.log(err)
   })
