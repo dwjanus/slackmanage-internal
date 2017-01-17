@@ -52,7 +52,7 @@ module.exports.createCase = (subject, user, description) => {
         console.log('--> Done with tasks - awaiting listener')
         console.log(`~ 3. DB.task.(second)then ~`)
         let sco
-        db.connect()
+        return db.connect()
         .then(obj => {
           console.log(`~ 4. DB.connect.then ~`)
           sco = obj
