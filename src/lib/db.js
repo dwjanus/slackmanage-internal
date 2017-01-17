@@ -41,42 +41,40 @@ function retrieveCase (sfid) {
 
 module.exports.createCase = (subject, user, description) => {
   console.log('~ createCase function ~')
-  db.task((t) => {
+  db.task(t => {
     console.log('~ DB.task ~')
     return t.one(`SELECT sfid FROM salesforcesandbox.user WHERE name = $1`, user)
     .then(userId => {
       console.log(`~ DB.task.then -> userId: ${util.inspect(userId)} ~`)
-      let args = [subject, user, userId, description, recordtypeid, 'Incident', 'Slack']
+      let args = [subject, user, userId.sfid, description, recordtypeid, 'Incident', 'Slack']
       return t.none(createQuery, args)
-    })
-    .then(() => {
-      console.log(`~ DB.task. second then ~`)
-      let sco
-      db.connect()
-      .then(obj => {
-        console.log(`~ DB.connect.then ~`)
-        sco = obj
-        sco.client.on('notification', data => {
-          console.log('Recieved trigger data: ', data)
-          retrieveCase(data.payload)
-        })
-        console.log(`~ About to return sco.none LISTEN status ~`)
-        return sco.none('LISTEN status')
-      })
-      .catch(err => {
-        console.log(err)
-      })
-      .finally(() => {
-        console.log(`~ DB.connect.finally ~`)
-        if (sco) {
-          console.log(`~ sco still exists - calling .done() ~`)
-          sco.done()
-        }
-      })
     })
   })
   .then(events => {
     console.log('Done with tasks - awaiting listener -\n', util.inspect(events))
+    console.log(`~ DB.task. second then ~`)
+    let sco
+    db.connect()
+    .then(obj => {
+      console.log(`~ DB.connect.then ~`)
+      sco = obj
+      sco.client.on('notification', data => {
+        console.log('Recieved trigger data: ', data)
+        retrieveCase(data.payload)
+      })
+      console.log(`~ About to return sco.none LISTEN status ~`)
+      return sco.none('LISTEN status')
+    })
+    .catch(err => {
+      console.log(err)
+    })
+    .finally(() => {
+      console.log(`~ DB.connect.finally ~`)
+      if (sco) {
+        console.log(`~ sco still exists - calling .done() ~`)
+        sco.done()
+      }
+    })
   })
   .catch(err => {
     console.log(err)
