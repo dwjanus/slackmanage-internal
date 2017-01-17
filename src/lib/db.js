@@ -59,7 +59,7 @@ module.exports.createCase = (subject, user, description) => {
       sco = obj
       sco.client.on('notification', data => {
         console.log('--> Recieved trigger data: ', data.payload)
-        retrieveCase(data.payload)
+        return retrieveCase(data.payload)
       })
       return sco.none('LISTEN status')
     })
