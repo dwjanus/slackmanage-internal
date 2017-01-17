@@ -48,31 +48,32 @@ module.exports.createCase = (subject, user, description) => {
       console.log(`~ 2. DB.task.then -> userId: ${util.inspect(userId.sfid)} ~`)
       let args = [subject, user, userId.sfid, description, recordtypeid, 'Incident', 'Slack']
       return t.none(createQuery, args)
-      .then(() => {
-        console.log('--> Done with tasks - awaiting listener')
-        console.log(`~ 3. DB.task.(second)then ~`)
-        let sco
-        return db.connect()
-        .then(obj => {
-          console.log(`~ 4. DB.connect.then ~`)
-          sco = obj
-          sco.client.on('notification', data => {
-            console.log('--> Recieved trigger data: ', data.payload)
-            return retrieveCase(data.payload)
-          })
-          return sco.none('LISTEN status')
-        })
-        .catch(err => {
-          console.log(err)
-        })
-        .finally(() => {
-          console.log(`~ 5. DB.connect.finally ~`)
-          if (sco) {
-            console.log(`~ 6. sco.done() ~`)
-            sco.done()
-          }
-        })
+    })
+  })
+  .then(() => {
+    console.log('--> Done with tasks - awaiting listener')
+    console.log(`~ 3. DB.task.(second)then ~`)
+    let sco
+    db.connect()
+    .then(obj => {
+      console.log(`~ 4. DB.connect.then ~`)
+      sco = obj
+      sco.none('LISTEN status')
+      sco.client.on('notification', data => {
+        console.log('--> Recieved trigger data: ', data.payload)
+        return retrieveCase(data.payload)
       })
+      // return sco.none('LISTEN status')
+    })
+    .catch(err => {
+      console.log(err)
+    })
+    .finally(() => {
+      console.log(`~ 5. DB.connect.finally ~`)
+      if (sco) {
+        console.log(`~ 6. sco.done() ~`)
+        sco.done()
+      }
     })
   })
   .catch(err => {
