@@ -3,10 +3,8 @@ import http from 'http'
 import _ from 'lodash'
 import util from 'util'
 import Botkit from 'botkit'
-import Promise from 'bluebird'
 import config from './lib/config.js'
-
-const db = Promise.promisify(require('./lib/db.js').createCase)
+import db from './lib/db.js'
 
 async function create (subject, user, description) {
   try {
