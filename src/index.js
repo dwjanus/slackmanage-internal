@@ -3,8 +3,19 @@ import http from 'http'
 import _ from 'lodash'
 import util from 'util'
 import Botkit from 'botkit'
-import db from './lib/db.js'
+import Promise from 'bluebird'
 import config from './lib/config.js'
+
+const db = Promise.promisify(require('./lib/db.js').createCase)
+
+async function create (subject, user, description) {
+  try {
+    console.log(`~ create function ~`)
+    return await db.createCase(subject, user, description)
+  } catch (err) {
+    console.log(err)
+  }
+}
 
 // Simple hack to ping server every 5min and keep app running
 setInterval(() => {
@@ -53,15 +64,6 @@ controller.spawn({
       }
     }
   })
-
-//   bot.configureIncomingWebhook({url: 'https://hooks.slack.com/services/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'})
-//   bot.sendWebhook({
-//     text: 'Webhook recieved! Check logs for response object data.',
-//     channel: '#test'
-//   }, (err, res) => {
-//     if (err) console.log(err)
-//     console.log('Incoming Webhook response:\n', util.inspect(res))
-//   })
 })
 
 /*************************************************************************************************/
@@ -135,19 +137,33 @@ controller.hears('(.*)', ['direct_message'], (bot, message) => {
   let user = _.find(fullTeamList, { id: message.user }).fullName
   let subject = message.text
   let description = `Automated incident creation for: ${user} ~ sent from Slack via HAL 9000`
-  db.createCase(subject, user, description, (err, result) => {
-    if (err) console.log(err)
-    bot.reply(message, {
-      text: `Success!`,
-      attachments: [
-        {
-          title: `Case: ${result.casenumber}`,
-          title_link: `https://cs60.salesforce.com./apex/SamanageESD__Incident?id=${result.sfid}`,
-          text: `${result.subject}`,
-          color: '#0067B3'
-        }
-      ]
-    })
+  // db.createCase(subject, user, description, (err, result) => {
+  //   if (err) console.log(err)
+  //   bot.reply(message, {
+  //     text: `Success!`,
+  //     attachments: [
+  //       {
+  //         title: `Case: ${result.casenumber}`,
+  //         title_link: `https://cs60.salesforce.com./apex/SamanageESD__Incident?id=${result.sfid}`,
+  //         text: `${result.subject}`,
+  //         color: '#0067B3'
+  //       }
+  //     ]
+  //   })
+  // })
+  let result = create(subject, user, description)
+  console.log('Result from awaited function:\n', util.inspect(result))
+  // here we would queue the listener for the status change of the case with (sfid)
+  bot.reply(message, {
+    text: `Success!`,
+    attachments: [
+      {
+        title: `Case: ${result.casenumber}`,
+        title_link: `https://cs60.salesforce.com./apex/SamanageESD__Incident?id=${result.sfid}`,
+        text: `${result.subject}`,
+        color: '#0067B3'
+      }
+    ]
   })
 })
 

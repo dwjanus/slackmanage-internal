@@ -26,52 +26,52 @@ const createQuery = 'INSERT INTO salesforcesandbox.case(subject, ' +
       'description, recordtypeid, samanageesd__recordtype__c, origin) ' +
       'values($1, $2, $3, $4, $5, $6, $7);'
 
-function retrieveCase (sfid, cb) {
+function retrieveCase (sfid) {
+  console.log('~ retrieveCase function ~')
   let retrieveQuery = `SELECT * FROM salesforcesandbox.case WHERE sfid = '${sfid}'`
   db.one(retrieveQuery)
   .then(data => {
-    cb(null, data.rows[0])
+    console.log(`~ DB.one finished -> data:\n${util.inspect(data)} ~`)
+    return data.rows[0]
   })
   .catch(err => {
-    cb(err, null)
+    console.log(err)
   })
 }
 
-module.exports.createCase = (subject, user, description, cb) => {
-  // db.connect({direct: true}) // if this works we can use it to globally listen to triggers for new status
-  // .then(sco => {
-  //   sco.client.on('notification', data => {
-  //     console.log('Recieved trigger data: ', data)
-  //     retrieveCase(data.payload, cb)
-  //   })
-  //   return sco.none('LISTEN status')
-  // })
-  // .catch(err => {
-  //   console.log(err)
-  // })
-
+module.exports.createCase = (subject, user, description) => {
+  console.log('~ createCase function ~')
   db.task((t) => {
+    console.log('~ DB.task ~')
     return t.one(`SELECT sfid FROM salesforcesandbox.user WHERE name ='${user}'`)
     .then(userId => {
+      console.log(`~ DB.task.then -> userId: ${userId} ~`)
       let args = [subject, user, userId, description, recordtypeid, 'Incident', 'Slack']
       return t.none(createQuery, args)
     })
     .then(() => {
+      console.log(`~ DB.task. second then ~`)
       let sco
       db.connect()
       .then(obj => {
+        console.log(`~ DB.connect.then ~`)
         sco = obj
         sco.client.on('notification', data => {
           console.log('Recieved trigger data: ', data)
-          retrieveCase(data.payload, cb)
+          retrieveCase(data.payload)
         })
+        console.log(`~ About to return sco.none LISTEN status ~`)
         return sco.none('LISTEN status')
       })
       .catch(err => {
-        cb(err, null)
+        console.log(err)
       })
       .finally(() => {
-        if (sco) sco.done()
+        console.log(`~ DB.connect.finally ~`)
+        if (sco) {
+          console.log(`~ sco still exists - calling .done() ~`)
+          sco.done()
+        }
       })
     })
   })
@@ -79,7 +79,7 @@ module.exports.createCase = (subject, user, description, cb) => {
     console.log('Done with tasks - awaiting listener -\n', util.inspect(events))
   })
   .catch(err => {
-    cb(err, null)
+    console.log(err)
   })
 }
 
