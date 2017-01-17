@@ -53,6 +53,15 @@ controller.spawn({
       }
     }
   })
+
+//   bot.configureIncomingWebhook({url: 'https://hooks.slack.com/services/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'})
+//   bot.sendWebhook({
+//     text: 'Webhook recieved! Check logs for response object data.',
+//     channel: '#test'
+//   }, (err, res) => {
+//     if (err) console.log(err)
+//     console.log('Incoming Webhook response:\n', util.inspect(res))
+//   })
 })
 
 /*************************************************************************************************/
@@ -66,7 +75,7 @@ controller.setupWebserver(port, (err, webserver) => {
   })
 })
 
-/*************************************************************************************************/  
+/*************************************************************************************************/
 
 controller.hears(['(^help$)'], ['direct_message', 'direct_mention'], (bot, message) => {
   let attachments = [
