@@ -1,6 +1,7 @@
 
 import promise from 'bluebird'
 import url from 'url'
+import util from 'util'
 import config from './config.js'
 const pgp = require('pg-promise')({
   promiseLib: promise
@@ -38,30 +39,47 @@ function retrieveCase (sfid, cb) {
 }
 
 module.exports.createCase = (subject, user, description, cb) => {
-  db.connect({direct: true}) // if this works we can use it to globally listen to triggers for new status
-  .then(sco => {
-    sco.client.on('notification', data => {
-      console.log('Recieved trigger data: ', data)
-      retrieveCase(data.payload, cb)
-    })
-    return sco.none('LISTEN status')
-  })
-  .catch(err => {
-    console.log(err)
-  })
+  // db.connect({direct: true}) // if this works we can use it to globally listen to triggers for new status
+  // .then(sco => {
+  //   sco.client.on('notification', data => {
+  //     console.log('Recieved trigger data: ', data)
+  //     retrieveCase(data.payload, cb)
+  //   })
+  //   return sco.none('LISTEN status')
+  // })
+  // .catch(err => {
+  //   console.log(err)
+  // })
 
   db.task((t) => {
     return t.one(`SELECT sfid FROM salesforcesandbox.user WHERE name ='${user}'`)
-      .then(userId => {
-        let args = [subject, user, userId, description, recordtypeid, 'Incident', 'Slack']
-        return t.none(createQuery, args)
+    .then(userId => {
+      let args = [subject, user, userId, description, recordtypeid, 'Incident', 'Slack']
+      return t.none(createQuery, args)
+    })
+  })
+
+  .then(events => {
+    console.log('Done with tasks - awaiting listener -\n', util.inspect(events))
+    let sco
+    db.connect()
+    .then(obj => {
+      sco = obj
+      sco.client.on('notification', data => {
+        console.log('Recieved trigger data: ', data)
+        retrieveCase(data.payload, cb)
       })
-    .then(() => {
-      console.log('Done with tasks - awaiting listener')
+      return sco.none('LISTEN status')
     })
     .catch(err => {
       cb(err, null)
     })
+    .finally(() => {
+      if (sco) sco.done()
+    })
+  })
+  .catch(err => {
+    cb(err, null)
   })
 }
 
