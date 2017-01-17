@@ -6,29 +6,6 @@ import Botkit from 'botkit'
 import config from './lib/config.js'
 import db from './lib/db.js'
 
-async function create (subject, user, description) {
-  try {
-    console.log(`--> create function`)
-    db.createCase(subject, user, description).then(result => {
-      console.log(`~ 8. finished waiting for createCase, result:\n${util.inspect(result)}`)
-      let response = {
-        text: `Success!`,
-        attachments: [
-          {
-            title: `Case: ${result.casenumber}`,
-            title_link: `https://cs60.salesforce.com./apex/SamanageESD__Incident?id=${result.sfid}`,
-            text: `${result.subject}`,
-            color: '#0067B3'
-          }
-        ]
-      }
-      return response
-    })
-  } catch (err) {
-    console.log(err)
-  }
-}
-
 // Simple hack to ping server every 5min and keep app running
 setInterval(() => {
   http.get('http://slackmanage-internal.herokuapp.com')
@@ -163,7 +140,19 @@ controller.hears('(.*)', ['direct_message'], (bot, message) => {
   //     ]
   //   })
   // })
-  create(subject, user, description).then(response => {
+  db.createCase(subject, user, description).then(result => {
+    console.log(`~ 8. finished waiting for createCase, result:\n${util.inspect(result)}`)
+    let response = {
+      text: `Success!`,
+      attachments: [
+        {
+          title: `Case: ${result.casenumber}`,
+          title_link: `https://cs60.salesforce.com./apex/SamanageESD__Incident?id=${result.sfid}`,
+          text: `${result.subject}`,
+          color: '#0067B3'
+        }
+      ]
+    }
     // here we would queue the listener for the status change of the case with (sfid)
     bot.reply(message, response)
   })
