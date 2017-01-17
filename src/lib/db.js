@@ -11,14 +11,13 @@ const pgp = require('pg-promise')({
 const params = url.parse(config('DATABASE_URL'))
 const auth = params.auth.split(':')
 const pgConfig = {
-  user: auth[0],
-  password: auth[1],
   host: params.hostname,
   port: params.port,
   database: params.pathname.split('/')[1],
-  poolSize: 20,
+  user: auth[0],
+  password: auth[1],
   ssl: true,
-  idleTimeoutMillis: 500 // .5s idle timeout for clients
+  poolSize: 20
 }
 const db = pgp(pgConfig)
 const recordtypeid = '01239000000EB4NAAW'
@@ -57,26 +56,27 @@ module.exports.createCase = (subject, user, description, cb) => {
       let args = [subject, user, userId, description, recordtypeid, 'Incident', 'Slack']
       return t.none(createQuery, args)
     })
+    .then(() => {
+      let sco
+      db.connect()
+      .then(obj => {
+        sco = obj
+        sco.client.on('notification', data => {
+          console.log('Recieved trigger data: ', data)
+          retrieveCase(data.payload, cb)
+        })
+        return sco.none('LISTEN status')
+      })
+      .catch(err => {
+        cb(err, null)
+      })
+      .finally(() => {
+        if (sco) sco.done()
+      })
+    })
   })
-
   .then(events => {
     console.log('Done with tasks - awaiting listener -\n', util.inspect(events))
-    let sco
-    db.connect()
-    .then(obj => {
-      sco = obj
-      sco.client.on('notification', data => {
-        console.log('Recieved trigger data: ', data)
-        retrieveCase(data.payload, cb)
-      })
-      return sco.none('LISTEN status')
-    })
-    .catch(err => {
-      cb(err, null)
-    })
-    .finally(() => {
-      if (sco) sco.done()
-    })
   })
   .catch(err => {
     cb(err, null)
