@@ -9,7 +9,7 @@ import db from './lib/db.js'
 async function create (subject, user, description) {
   try {
     console.log(`--> create function`)
-    await db.createCase(subject, user, description).then(result => {
+    db.createCase(subject, user, description).then(result => {
       console.log(`~ 8. finished waiting for createCase, result:\n${util.inspect(result)}`)
       let response = {
         text: `Success!`,
@@ -163,9 +163,10 @@ controller.hears('(.*)', ['direct_message'], (bot, message) => {
   //     ]
   //   })
   // })
-
-  // here we would queue the listener for the status change of the case with (sfid)
-  bot.reply(message, create(subject, user, description))
+  create(subject, user, description).then(response => {
+    // here we would queue the listener for the status change of the case with (sfid)
+    bot.reply(message, response)
+  })
 })
 
 // Handler for interractive message buttons
