@@ -1,30 +1,30 @@
 
 import promise from 'bluebird'
+import url from 'url'
 import util from 'util'
 import config from './config.js'
-const pgp = require('pg-promise')({
+let pgp = require('pg-promise')({
   promiseLib: promise
 })
 
 // config for pool
-// const params = url.parse(config('DATABASE_URL'))
-// const auth = params.auth.split(':')
-// const pgConfig = {
-//   user: auth[0],
-//   password: auth[1],
-//   host: params.hostname,
-//   port: params.port,
-//   database: params.pathname.split('/')[1],
-//   poolSize: 20,
-//   ssl: true,
-//   idleTimeoutMillis: 500 // .5s idle timeout for clients
-// }
-const db = pgp(config('DATABASE_URL'))
+const params = url.parse(config('DATABASE_URL'))
+const auth = params.auth.split(':')
+const pgConfig = {
+  user: auth[0],
+  password: auth[1],
+  database: params.pathname.split('/')[1],
+  host: params.hostname,
+  port: params.port,
+  ssl: true
+}
+console.log('pgConfig:\n', util.inspect(pgConfig))
+const db = pgp(pgConfig)
 const recordtypeid = '01239000000EB4NAAW'
 const createQuery = 'INSERT INTO salesforcesandbox.case(subject, ' +
       'samanageesd__creatorname__c, samanageesd__requesteruser__c, ' +
       'description, recordtypeid, samanageesd__recordtype__c, origin) ' +
-      'values($1, $2, $3, $4, $5, $6, $7);'
+      'values($1, $2, $3, $4, $5, $6, $7)'
 
 function retrieveCase (sfid) {
   console.log('~ retrieveCase function ~')
@@ -32,7 +32,7 @@ function retrieveCase (sfid) {
   db.one(retrieveQuery)
   .then(data => {
     console.log(`~ DB.one finished -> data:\n${util.inspect(data)} ~`)
-    return data.rows[0]
+    return Promise.resolve(data.rows[0])
   })
   .catch(err => {
     console.log(err)
@@ -43,9 +43,9 @@ module.exports.createCase = (subject, user, description) => {
   console.log('~ createCase function ~')
   db.task((t) => {
     console.log('~ DB.task ~')
-    return t.one(`SELECT sfid FROM salesforcesandbox.user WHERE name ='${user}'`)
+    return t.one(`SELECT sfid FROM salesforcesandbox.user WHERE name = $1`, user)
     .then(userId => {
-      console.log(`~ DB.task.then -> userId: ${userId} ~`)
+      console.log(`~ DB.task.then -> userId: ${util.inspect(userId)} ~`)
       let args = [subject, user, userId, description, recordtypeid, 'Incident', 'Slack']
       return t.none(createQuery, args)
     })

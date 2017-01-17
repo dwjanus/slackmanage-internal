@@ -9,7 +9,19 @@ import db from './lib/db.js'
 async function create (subject, user, description) {
   try {
     console.log(`~ create function ~`)
-    return await db.createCase(subject, user, description)
+    let result = await db.createCase(subject, user, description)
+    let response = {
+      text: `Success!`,
+      attachments: [
+        {
+          title: `Case: ${result.casenumber}`,
+          title_link: `https://cs60.salesforce.com./apex/SamanageESD__Incident?id=${result.sfid}`,
+          text: `${result.subject}`,
+          color: '#0067B3'
+        }
+      ]
+    }
+    return response
   } catch (err) {
     console.log(err)
   }
@@ -149,20 +161,10 @@ controller.hears('(.*)', ['direct_message'], (bot, message) => {
   //     ]
   //   })
   // })
-  let result = create(subject, user, description)
-  console.log('Result from awaited function:\n', util.inspect(result))
+  let newcase = create(subject, user, description)
+  console.log('Result from awaited function:\n', util.inspect(newcase))
   // here we would queue the listener for the status change of the case with (sfid)
-  bot.reply(message, {
-    text: `Success!`,
-    attachments: [
-      {
-        title: `Case: ${result.casenumber}`,
-        title_link: `https://cs60.salesforce.com./apex/SamanageESD__Incident?id=${result.sfid}`,
-        text: `${result.subject}`,
-        color: '#0067B3'
-      }
-    ]
-  })
+  bot.reply(message, newcase)
 })
 
 // Handler for interractive message buttons
