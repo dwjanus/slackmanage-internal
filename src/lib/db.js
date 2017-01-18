@@ -40,40 +40,43 @@ const createQuery = 'INSERT INTO salesforcesandbox.case(subject, ' +
 
 module.exports.createCase = (subject, user, description) => {
   console.log('--> createCase function')
-  return db.task(t => {
+  db.task(t => {
     console.log('~ 1. DB.task ~')
     return t.one(`SELECT sfid FROM salesforcesandbox.user WHERE name = $1`, user)
     .then(userId => {
       console.log(`~ 2. DB.task.then -> userId: ${util.inspect(userId.sfid)} ~`)
       let args = [subject, user, userId.sfid, description, recordtypeid, 'Incident', 'Slack']
       return t.none(createQuery, args)
-      .then(() => {
-        let sco
-        db.connect()
-        .then(obj => {
-          console.log(`~ 3. DB.connect.then ~`)
-          sco = obj
-          sco.client.on('notification', data => {
-            console.log('--> Recieved trigger data: ', data.payload)
-            return db.one(`SELECT * FROM salesforcesandbox.case WHERE sfid = '${data.payload}'`)
-            .then(data => {
-              console.log(`~ 4. case retrieved via select, data:\n${util.inspect(data)}`)
-              return data
-            })
-          })
-          return sco.none('LISTEN status')
-        })
-        .catch(err => {
-          console.log(err)
-        })
-        .finally(() => {
-          if (sco) {
-            console.log('-- connect.finally --')
-            sco.done()
-          }
+    })
+  })
+  .then(() => {
+    let sco
+    db.connect()
+    .then(obj => {
+      console.log(`~ 3. DB.connect.then ~`)
+      sco = obj
+      sco.client.on('notification', data => {
+        console.log('--> Recieved trigger data: ', data.payload)
+        return db.one(`SELECT * FROM salesforcesandbox.case WHERE sfid = '${data.payload}'`)
+        .then(data => {
+          console.log(`~ 4. case retrieved via select, data:\n${util.inspect(data)}`)
+          return data
         })
       })
+      return sco.none('LISTEN status')
     })
+    .catch(err => {
+      console.log(err)
+    })
+    .finally(() => {
+      if (sco) {
+        console.log('-- connect.finally --')
+        sco.done()
+      }
+    })
+  })
+  .catch(err => {
+    console.log(err)
   })
 }
 
