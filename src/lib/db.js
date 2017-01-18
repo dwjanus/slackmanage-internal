@@ -39,7 +39,6 @@ const retrieveCase = Promise.method(() => {
       let retrieveQuery = `SELECT * FROM salesforcesandbox.case WHERE sfid = '${data.payload}'`
       db.one(retrieveQuery)
       .then(data => {
-        console.log(`~ 4. DB.one finished -> data:\n${util.inspect(data)} ~`)
         return data
       })
       .catch(err => {
@@ -55,19 +54,16 @@ const retrieveCase = Promise.method(() => {
 
 module.exports.createCase = (subject, user, description) => {
   console.log('--> createCase function')
-  db.task(t => {
+  return db.task(t => {
     console.log('~ 1. DB.task ~')
     return t.one(`SELECT sfid FROM salesforcesandbox.user WHERE name = $1`, user)
     .then(userId => {
       console.log(`~ 2. DB.task.then -> userId: ${util.inspect(userId.sfid)} ~`)
       let args = [subject, user, userId.sfid, description, recordtypeid, 'Incident', 'Slack']
       return t.none(createQuery, args)
-    })
-  })
-  .then(() => {
-    console.log(`--> Done with tasks`)
-    retrieveCase().then(data => {
-      return data
+      .then(() => {
+        return retrieveCase()
+      })
     })
   })
   .catch(err => {
