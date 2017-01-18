@@ -64,7 +64,8 @@ module.exports.createCase = (subject, user, description) => {
     })
   })
   .then(t => {
-    return retrieveCase(t, (data) => {
+    return retrieveCase(t)
+    .then(data => {
       console.log('~ 3. task.then - Retrieve Case data:\n', util.inspect(data))
       return data
     })
