@@ -17,7 +17,7 @@ const pgConfig = {
   host: params.hostname,
   port: params.port,
   ssl: true,
-  poolIdleTimeout: 1500
+  poolIdleTimeout: 3500
 }
 const db = pgp(pgConfig)
 const recordtypeid = '01239000000EB4NAAW'
@@ -49,7 +49,7 @@ module.exports.createCase = (subject, user, description) => {
       return t.none(createQuery, args)
       .then(() => {
         let sco
-        db.connect()
+        return db.connect()
         .then(obj => {
           console.log(`~ 3. DB.connect.then ~`)
           sco = obj
@@ -67,6 +67,7 @@ module.exports.createCase = (subject, user, description) => {
         })
         .finally(() => {
           if (sco) {
+            console.log('-- connect.finally --')
             sco.done()
           }
         })
