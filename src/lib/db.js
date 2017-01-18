@@ -39,6 +39,7 @@ const createQuery = 'INSERT INTO salesforcesandbox.case(subject, ' +
 // }
 
 module.exports.createCase = (subject, user, description) => {
+  let sco
   console.log('--> createCase function')
   db.task(t => {
     console.log('~ 1. DB.task ~')
@@ -46,12 +47,11 @@ module.exports.createCase = (subject, user, description) => {
     .then(userId => {
       console.log(`~ 2. DB.task.then -> userId: ${util.inspect(userId.sfid)} ~`)
       let args = [subject, user, userId.sfid, description, recordtypeid, 'Incident', 'Slack']
-      return t.none(createQuery, args)
+      t.none(createQuery, args)
     })
   })
   .then(() => {
-    let sco
-    db.connect()
+    return db.connect()
     .then(obj => {
       console.log(`~ 3. DB.connect.then ~`)
       sco = obj
@@ -69,18 +69,15 @@ module.exports.createCase = (subject, user, description) => {
       })
       return sco.none('LISTEN status')
     })
-    .catch(err => {
-      console.log(err)
-    })
-    .finally(() => {
-      if (sco) {
-        console.log('-- connect.finally --')
-        sco.done()
-      }
-    })
   })
   .catch(err => {
     console.log(err)
+  })
+  .finally(() => {
+    if (sco) {
+      console.log('-- connect.finally --')
+      sco.done()
+    }
   })
 }
 
