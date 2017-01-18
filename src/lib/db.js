@@ -40,7 +40,7 @@ const createQuery = 'INSERT INTO salesforcesandbox.case(subject, ' +
 
 module.exports.createCase = (subject, user, description) => {
   console.log('--> createCase function')
-  db.task(t => {
+  return db.task(t => {
     console.log('~ 1. DB.task ~')
     t.one(`SELECT sfid FROM salesforcesandbox.user WHERE name = $1`, user)
     .then(userId => {
