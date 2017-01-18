@@ -17,7 +17,7 @@ const pgConfig = {
   host: params.hostname,
   port: params.port,
   ssl: true,
-  poolIdleTimeout: 8000
+  poolIdleTimeout: 1500
 }
 const db = pgp(pgConfig)
 const recordtypeid = '01239000000EB4NAAW'
@@ -26,10 +26,9 @@ const createQuery = 'INSERT INTO salesforcesandbox.case(subject, ' +
       'description, recordtypeid, samanageesd__recordtype__c, origin) ' +
       'values($1, $2, $3, $4, $5, $6, $7)'
 
-const retrieveCase = Promise.method((sfid) => {
+const retrieveCase = (sfid) => {
   console.log('--> retrieveCase function')
-  let retrieveQuery = `SELECT * FROM salesforcesandbox.case WHERE sfid = '${sfid}'`
-  return db.one(retrieveQuery)
+  return db.one(`SELECT * FROM salesforcesandbox.case WHERE sfid = '${sfid}'`)
   .then(data => {
     console.log(`~ 4. Case data retrieved:\n${util.inspect(data)}`)
     return data
@@ -37,7 +36,7 @@ const retrieveCase = Promise.method((sfid) => {
   .catch(err => {
     console.log(err)
   })
-})
+}
 
 module.exports.createCase = (subject, user, description) => {
   console.log('--> createCase function')
@@ -56,7 +55,10 @@ module.exports.createCase = (subject, user, description) => {
           sco = obj
           sco.client.on('notification', data => {
             console.log('--> Recieved trigger data: ', data.payload)
-            return retrieveCase(data.payload)
+            return retrieveCase(data.payload).then(data => {
+              console.log(`~ 5. retrieveCase.then, data:\n${util.inspect(data)}`)
+              return data
+            })
           })
           return sco.none('LISTEN status')
         })
