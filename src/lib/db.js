@@ -30,13 +30,14 @@ const retrieveCase = () => {
   return new Promise((resolve, reject) => {
     console.log('--> retrieveCase function')
     let sco
-    db.connect()
+    return db.connect()
     .then(obj => {
       sco = obj
       sco.client.on('notification', data => {
         console.log('--> Recieved trigger data: ', data.payload)
         return sco.one(`SELECT * FROM salesforcesandbox.case WHERE sfid = '${data.payload}'`)
         .then(data => {
+          sco.done()
           console.log(`~ 4. case retrieved via select, data:\n${util.inspect(data)}`)
           return resolve(data)
         })
@@ -45,11 +46,6 @@ const retrieveCase = () => {
     })
     .catch(err => {
       reject(err)
-    })
-    .finally(() => {
-      if (sco) {
-        sco.done()
-      }
     })
   })
 }
