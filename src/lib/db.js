@@ -42,42 +42,35 @@ module.exports.createCase = (subject, user, description) => {
   console.log('--> createCase function')
   db.task(t => {
     console.log('~ 1. DB.task ~')
-    t.one(`SELECT sfid FROM salesforcesandbox.user WHERE name = $1`, user)
+    return t.one(`SELECT sfid FROM salesforcesandbox.user WHERE name = $1`, user)
     .then(userId => {
       console.log(`~ 2. DB.task.then -> userId: ${util.inspect(userId.sfid)} ~`)
       let args = [subject, user, userId.sfid, description, recordtypeid, 'Incident', 'Slack']
+      let sco
       return t.none(createQuery, args)
-    })
-  })
-  .then(() => {
-    let sco
-    db.connect()
-    .then(obj => {
-      console.log(`~ 3. DB.connect.then ~`)
-      sco = obj
-      sco.client.on('notification', data => {
-        console.log('--> Recieved trigger data: ', data.payload)
-        db.one(`SELECT * FROM salesforcesandbox.case WHERE sfid = '${data.payload}'`)
-        .then(data => {
-          console.log(`~ 4. case retrieved via select, data:\n${util.inspect(data)}`)
-          return data
+      .then(() => {
+        sco = t
+        sco.client.on('notification', data => {
+          console.log('--> Recieved trigger data: ', data.payload)
+          return t.one(`SELECT * FROM salesforcesandbox.case WHERE sfid = '${data.payload}'`)
+          .then(data => {
+            console.log(`~ 4. case retrieved via select, data:\n${util.inspect(data)}`)
+            return data
+          })
         })
+        console.log(' - returning LISTEN satus - ')
+        return t.none('LISTEN status')
       })
-      console.log(' - returning LISTEN satus - ')
-      return sco.none('LISTEN status')
+      .catch(err => {
+        console.log(err)
+      })
+      .finally(() => {
+        if (sco) {
+          console.log('-- connect.finally --')
+          sco.done()
+        }
+      })
     })
-    .catch(err => {
-      console.log(err)
-    })
-    .finally(() => {
-      if (sco) {
-        console.log('-- connect.finally --')
-        sco.done()
-      }
-    })
-  })
-  .catch(err => {
-    console.log(err)
   })
 }
 
