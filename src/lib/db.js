@@ -62,14 +62,11 @@ module.exports.createCase = (subject, user, description) => {
       console.log(`~ 2. DB.task.then -> userId: ${util.inspect(userId.sfid)} ~`)
       let args = [subject, user, userId.sfid, description, recordtypeid, 'Incident', 'Slack']
       return t.none(createQuery, args)
-      .then(() => {
-        return retrieveCase()
-      })
     })
   })
   .then(data => {
     console.log(`--> Done with tasks, data:\n${util.inspect(data)}\n`)
-    return data
+    return retrieveCase()
   })
   .catch(err => {
     console.log(err)
