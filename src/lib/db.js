@@ -26,19 +26,19 @@ const createQuery = 'INSERT INTO salesforcesandbox.case(subject, ' +
       'description, recordtypeid, samanageesd__recordtype__c, origin) ' +
       'values($1, $2, $3, $4, $5, $6, $7)'
 
-const retrieveCase = () => {
+const retrieveCase = (t) => {
   console.log('--> retrieveCase function')
   let sco
-  db.connect()
+  db.connect(t)
   .then(obj => {
     sco = obj
     sco.client.on('notification', data => {
       console.log('--> Recieved trigger data: ', data.payload)
-      return sco.one(`SELECT * FROM salesforcesandbox.case WHERE sfid = '${data.payload}'`)
-      .then(data => {
-        console.log(`~ 4. case retrieved via select, data:\n${util.inspect(data)}`)
-        return data
-      })
+      return t.one(`SELECT * FROM salesforcesandbox.case WHERE sfid = '${data.payload}'`)
+      // .then(data => {
+      //   console.log(`~ 4. case retrieved via select, data:\n${util.inspect(data)}`)
+      //   return data
+      // })
     })
     return sco.none('LISTEN status')
   })
@@ -63,8 +63,8 @@ module.exports.createCase = (subject, user, description) => {
       return t.none(createQuery, args)
     })
   })
-  .then(() => {
-    return retrieveCase(data => {
+  .then(t => {
+    return retrieveCase(t, (data) => {
       console.log('~ 3. task.then - Retrieve Case data:\n', util.inspect(data))
       return data
     })
