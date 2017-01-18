@@ -17,7 +17,7 @@ const pgConfig = {
   host: params.hostname,
   port: params.port,
   ssl: true,
-  poolIdleTimeout: 5000
+  poolIdleTimeout: 8000
 }
 const db = pgp(pgConfig)
 const recordtypeid = '01239000000EB4NAAW'
@@ -31,15 +31,15 @@ const retrieveCase = Promise.method(() => {
   let sco
   db.connect()
   .then(obj => {
-    console.log(`~ 4. DB.connect.then ~`)
+    console.log(`~ 3. DB.connect.then ~`)
     sco = obj
     sco.client.on('notification', data => {
       console.log('--> Recieved trigger data: ', data.payload)
       sco.done()
       let retrieveQuery = `SELECT * FROM salesforcesandbox.case WHERE sfid = '${data.payload}'`
-      return db.one(retrieveQuery)
+      db.one(retrieveQuery)
       .then(data => {
-        console.log(`~ 7. DB.one finished -> data:\n${util.inspect(data)} ~`)
+        console.log(`~ 4. DB.one finished -> data:\n${util.inspect(data)} ~`)
         return data
       })
       .catch(err => {
@@ -62,11 +62,14 @@ module.exports.createCase = (subject, user, description) => {
       console.log(`~ 2. DB.task.then -> userId: ${util.inspect(userId.sfid)} ~`)
       let args = [subject, user, userId.sfid, description, recordtypeid, 'Incident', 'Slack']
       return t.none(createQuery, args)
+      .then(() => {
+        return retrieveCase()
+      })
     })
   })
-  .then(() => {
-    console.log('--> Done with tasks - awaiting listener')
-    return retrieveCase()
+  .then(data => {
+    console.log(`--> Done with tasks, data:\n${util.inspect(data)}\n`)
+    return data
   })
   .catch(err => {
     console.log(err)
