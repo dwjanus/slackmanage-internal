@@ -38,8 +38,8 @@ const retrieveCase = () => {
         return sco.one(`SELECT * FROM salesforcesandbox.case WHERE sfid = '${data.payload}'`)
         .then(data => {
           sco.done()
-          console.log(`~ 4. case retrieved via select, data:\n${util.inspect(data)}`)
-          return resolve(data)
+          console.log(`~ 3. case retrieved via select, data:\n${util.inspect(data)}`)
+          resolve(data)
         })
       })
       return sco.none('LISTEN status')
@@ -61,7 +61,7 @@ module.exports.createCase = (subject, user, description) => {
       return t.none(createQuery, args)
       .then(() => {
         return retrieveCase().then(data => {
-          console.log('~ 3. task.then - Retrieve Case data:\n', util.inspect(data))
+          console.log('~ 4. task.then - Retrieve Case data:\n', util.inspect(data))
           return data
         })
       })
