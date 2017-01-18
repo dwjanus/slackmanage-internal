@@ -26,26 +26,13 @@ const createQuery = 'INSERT INTO salesforcesandbox.case(subject, ' +
       'description, recordtypeid, samanageesd__recordtype__c, origin) ' +
       'values($1, $2, $3, $4, $5, $6, $7)'
 
-const retrieveCase = Promise.method(() => {
+const retrieveCase = Promise.method((sfid) => {
   console.log('--> retrieveCase function')
-  let sco
-  db.connect()
-  .then(obj => {
-    console.log(`~ 3. DB.connect.then ~`)
-    sco = obj
-    sco.client.on('notification', data => {
-      console.log('--> Recieved trigger data: ', data.payload)
-      sco.done()
-      let retrieveQuery = `SELECT * FROM salesforcesandbox.case WHERE sfid = '${data.payload}'`
-      db.one(retrieveQuery)
-      .then(data => {
-        return data
-      })
-      .catch(err => {
-        console.log(err)
-      })
-    })
-    return sco.none('LISTEN status')
+  let retrieveQuery = `SELECT * FROM salesforcesandbox.case WHERE sfid = '${sfid}'`
+  return db.one(retrieveQuery)
+  .then(data => {
+    console.log(`~ 4. Case data retrieved:\n${util.inspect(data)}`)
+    return data
   })
   .catch(err => {
     console.log(err)
@@ -62,7 +49,25 @@ module.exports.createCase = (subject, user, description) => {
       let args = [subject, user, userId.sfid, description, recordtypeid, 'Incident', 'Slack']
       return t.none(createQuery, args)
       .then(() => {
-        return retrieveCase()
+        let sco
+        db.connect()
+        .then(obj => {
+          console.log(`~ 3. DB.connect.then ~`)
+          sco = obj
+          sco.client.on('notification', data => {
+            console.log('--> Recieved trigger data: ', data.payload)
+            return retrieveCase(data.payload)
+          })
+          return sco.none('LISTEN status')
+        })
+        .catch(err => {
+          console.log(err)
+        })
+        .finally(() => {
+          if (sco) {
+            sco.done()
+          }
+        })
       })
     })
   })
