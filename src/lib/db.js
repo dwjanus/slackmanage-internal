@@ -49,7 +49,7 @@ module.exports.createCase = (subject, user, description) => {
       return t.none(createQuery, args)
       .then(() => {
         let sco
-        return db.connect()
+        db.connect()
         .then(obj => {
           console.log(`~ 3. DB.connect.then ~`)
           sco = obj
