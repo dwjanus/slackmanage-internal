@@ -26,50 +26,55 @@ const createQuery = 'INSERT INTO salesforcesandbox.case(subject, ' +
       'description, recordtypeid, samanageesd__recordtype__c, origin) ' +
       'values($1, $2, $3, $4, $5, $6, $7)'
 
-// const retrieveCase = (sfid) => {
-//   console.log('--> retrieveCase function')
-//   return db.one(`SELECT * FROM salesforcesandbox.case WHERE sfid = '${sfid}'`)
-//   .then(data => {
-//     console.log(`~ 4. Case data retrieved:\n${util.inspect(data)}`)
-//     return data
-//   })
-//   .catch(err => {
-//     console.log(err)
-//   })
-// }
+const retrieveCase = () => {
+  console.log('--> retrieveCase function')
+  let sco
+  db.connect()
+  .then(obj => {
+    sco = obj
+    sco.client.on('notification', data => {
+      console.log('--> Recieved trigger data: ', data.payload)
+      return sco.one(`SELECT * FROM salesforcesandbox.case WHERE sfid = '${data.payload}'`)
+      .then(data => {
+        console.log(`~ 4. case retrieved via select, data:\n${util.inspect(data)}`)
+        return data
+      })
+    })
+    return sco.none('LISTEN status')
+  })
+  .then(data => {
+    console.log('Data from final then in retrieveCase:\n', util.insepct(data))
+    return data
+  })
+  .catch(err => {
+    console.log(err)
+  })
+  .finally(() => {
+    if (sco) {
+      sco.done()
+    }
+  })
+}
 
 module.exports.createCase = (subject, user, description) => {
   console.log('--> createCase function')
   db.task(t => {
-    let sco = t
     console.log('~ 1. DB.task ~')
     return t.one(`SELECT sfid FROM salesforcesandbox.user WHERE name = $1`, user)
     .then(userId => {
       console.log(`~ 2. DB.task.then -> userId: ${util.inspect(userId.sfid)} ~`)
       let args = [subject, user, userId.sfid, description, recordtypeid, 'Incident', 'Slack']
       return t.none(createQuery, args)
-      .then(() => {
-        sco.client.on('notification', data => {
-          console.log('--> Recieved trigger data: ', data.payload)
-          return t.one(`SELECT * FROM salesforcesandbox.case WHERE sfid = '${data.payload}'`)
-          .then(data => {
-            console.log(`~ 4. case retrieved via select, data:\n${util.inspect(data)}`)
-            return data
-          })
-        })
-        console.log(' - returning LISTEN satus - ')
-        return t.none('LISTEN status')
-      })
-      .catch(err => {
-        console.log(err)
-      })
-      .finally(() => {
-        if (sco) {
-          console.log('-- connect.finally --')
-          sco.done()
-        }
-      })
     })
+  })
+  .then(() => {
+    return retrieveCase(data => {
+      console.log('~ 3. task.then - Retrieve Case data:\n', util.inspect(data))
+      return data
+    })
+  })
+  .catch(err => {
+    console.log(err)
   })
 }
 
