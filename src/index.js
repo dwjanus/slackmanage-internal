@@ -129,20 +129,6 @@ controller.hears('(.*)', ['direct_message'], (bot, message) => {
   let user = _.find(fullTeamList, { id: message.user }).fullName
   let subject = message.text
   let description = `Automated incident creation for: ${user} ~ sent from Slack via HAL 9000`
-  // db.createCase(subject, user, description, (err, result) => {
-  //   if (err) console.log(err)
-  //   bot.reply(message, {
-  //     text: `Success!`,
-  //     attachments: [
-  //       {
-  //         title: `Case: ${result.casenumber}`,
-  //         title_link: `https://cs60.salesforce.com./apex/SamanageESD__Incident?id=${result.sfid}`,
-  //         text: `${result.subject}`,
-  //         color: '#0067B3'
-  //       }
-  //     ]
-  //   })
-  // })
   db.createCase(subject, user, description)
     .then(result => {
       console.log(`~ 8. finished waiting for createCase, result:\n${util.inspect(result)}`)
