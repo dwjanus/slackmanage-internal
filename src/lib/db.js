@@ -75,6 +75,10 @@ module.exports.createCase = (subject, user, description) => {
       }
     })
   })
+  .then(data => {
+    console.log('~ 5. final then, data:\n', util.inspect(data))
+    return Promise.resolve(data)
+  })
   .catch(err => {
     console.log(err)
   })
