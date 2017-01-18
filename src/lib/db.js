@@ -26,18 +26,32 @@ const createQuery = 'INSERT INTO salesforcesandbox.case(subject, ' +
       'description, recordtypeid, samanageesd__recordtype__c, origin) ' +
       'values($1, $2, $3, $4, $5, $6, $7)'
 
-const retrieveCase = (sfid) => {
+const retrieveCase = Promise.method(() => {
   console.log('--> retrieveCase function')
-  let retrieveQuery = `SELECT * FROM salesforcesandbox.case WHERE sfid = '${sfid}'`
-  db.one(retrieveQuery)
-    .then(data => {
-      console.log(`~ 7. DB.one finished -> data:\n${util.inspect(data)} ~`)
-      return data
+  let sco
+  db.connect()
+  .then(obj => {
+    console.log(`~ 4. DB.connect.then ~`)
+    sco = obj
+    sco.client.on('notification', data => {
+      console.log('--> Recieved trigger data: ', data.payload)
+      sco.done()
+      let retrieveQuery = `SELECT * FROM salesforcesandbox.case WHERE sfid = '${data.payload}'`
+      return db.one(retrieveQuery)
+      .then(data => {
+        console.log(`~ 7. DB.one finished -> data:\n${util.inspect(data)} ~`)
+        return data
+      })
+      .catch(err => {
+        console.log(err)
+      })
     })
-    .catch(err => {
-      console.log(err)
-    })
-}
+    return sco.none('LISTEN status')
+  })
+  .catch(err => {
+    console.log(err)
+  })
+})
 
 module.exports.createCase = (subject, user, description) => {
   console.log('--> createCase function')
@@ -52,29 +66,7 @@ module.exports.createCase = (subject, user, description) => {
   })
   .then(() => {
     console.log('--> Done with tasks - awaiting listener')
-    console.log(`~ 3. DB.task.(second)then ~`)
-    let sco
-    db.connect()
-    .then(obj => {
-      console.log(`~ 4. DB.connect.then ~`)
-      sco = obj
-      sco.client.on('notification', data => {
-        console.log('--> Recieved trigger data: ', data.payload)
-        sco.done()
-        return retrieveCase(data.payload)
-      })
-      return sco.none('LISTEN status')
-    })
-    .catch(err => {
-      console.log(err)
-    })
-    // .finally(() => {
-    //   console.log(`~ 5. DB.connect.finally ~`)
-    //   if (sco) {
-    //     console.log(`~ 6. sco.done() ~`)
-    //     sco.done()
-    //   }
-    // })
+    return retrieveCase()
   })
   .catch(err => {
     console.log(err)
