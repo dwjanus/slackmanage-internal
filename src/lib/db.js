@@ -55,7 +55,7 @@ module.exports.createCase = (subject, user, description) => {
           sco = obj
           sco.client.on('notification', data => {
             console.log('--> Recieved trigger data: ', data.payload)
-            return db.one(`SELECT * FROM salesforcesandbox.case WHERE sfid = '${data.payload}'`)
+            return t.one(`SELECT * FROM salesforcesandbox.case WHERE sfid = '${data.payload}'`)
             // retrieveCase(data.payload).then(data => {
             //   console.log(`~ 5. retrieveCase.then, data:\n${util.inspect(data)}`)
             //   return data
