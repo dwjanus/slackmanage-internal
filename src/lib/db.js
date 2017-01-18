@@ -17,7 +17,7 @@ const pgConfig = {
   host: params.hostname,
   port: params.port,
   ssl: true,
-  poolIdleTimeout: 3500
+  poolIdleTimeout: 5000
 }
 const db = pgp(pgConfig)
 const recordtypeid = '01239000000EB4NAAW'
@@ -26,17 +26,17 @@ const createQuery = 'INSERT INTO salesforcesandbox.case(subject, ' +
       'description, recordtypeid, samanageesd__recordtype__c, origin) ' +
       'values($1, $2, $3, $4, $5, $6, $7)'
 
-const retrieveCase = (sfid) => {
-  console.log('--> retrieveCase function')
-  return db.one(`SELECT * FROM salesforcesandbox.case WHERE sfid = '${sfid}'`)
-  .then(data => {
-    console.log(`~ 4. Case data retrieved:\n${util.inspect(data)}`)
-    return data
-  })
-  .catch(err => {
-    console.log(err)
-  })
-}
+// const retrieveCase = (sfid) => {
+//   console.log('--> retrieveCase function')
+//   return db.one(`SELECT * FROM salesforcesandbox.case WHERE sfid = '${sfid}'`)
+//   .then(data => {
+//     console.log(`~ 4. Case data retrieved:\n${util.inspect(data)}`)
+//     return data
+//   })
+//   .catch(err => {
+//     console.log(err)
+//   })
+// }
 
 module.exports.createCase = (subject, user, description) => {
   console.log('--> createCase function')
@@ -49,16 +49,17 @@ module.exports.createCase = (subject, user, description) => {
       return t.none(createQuery, args)
       .then(() => {
         let sco
-        return db.connect()
+        db.connect()
         .then(obj => {
           console.log(`~ 3. DB.connect.then ~`)
           sco = obj
           sco.client.on('notification', data => {
             console.log('--> Recieved trigger data: ', data.payload)
-            return retrieveCase(data.payload).then(data => {
-              console.log(`~ 5. retrieveCase.then, data:\n${util.inspect(data)}`)
-              return data
-            })
+            return db.one(`SELECT * FROM salesforcesandbox.case WHERE sfid = '${data.payload}'`)
+            // retrieveCase(data.payload).then(data => {
+            //   console.log(`~ 5. retrieveCase.then, data:\n${util.inspect(data)}`)
+            //   return data
+            // })
           })
           return sco.none('LISTEN status')
         })
