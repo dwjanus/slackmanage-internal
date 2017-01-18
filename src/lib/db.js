@@ -42,10 +42,6 @@ const retrieveCase = () => {
     })
     return sco.none('LISTEN status')
   })
-  .then(data => {
-    console.log('Data from final then in retrieveCase:\n', util.inspect(data))
-    return data
-  })
   .catch(err => {
     console.log(err)
   })
