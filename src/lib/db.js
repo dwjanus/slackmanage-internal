@@ -63,12 +63,12 @@ module.exports.createCase = (subject, user, description) => {
       console.log(`~ 2. DB.task.then -> userId: ${util.inspect(userId.sfid)} ~`)
       let args = [subject, user, userId.sfid, description, recordtypeid, 'Incident', 'Slack']
       return t.none(createQuery, args)
-    })
-  })
-  .then(() => {
-    retrieveCase().then(data => {
-      console.log('~ 3. task.then - Retrieve Case data:\n', util.inspect(data))
-      return data
+      .then(() => {
+        retrieveCase().then(data => {
+          console.log('~ 3. task.then - Retrieve Case data:\n', util.inspect(data))
+          return data
+        })
+      })
     })
   })
   .catch(err => {
