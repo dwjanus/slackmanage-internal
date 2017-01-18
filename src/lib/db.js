@@ -42,7 +42,7 @@ module.exports.createCase = (subject, user, description) => {
   console.log('--> createCase function')
   db.task(t => {
     console.log('~ 1. DB.task ~')
-    return t.one(`SELECT sfid FROM salesforcesandbox.user WHERE name = $1`, user)
+    t.one(`SELECT sfid FROM salesforcesandbox.user WHERE name = $1`, user)
     .then(userId => {
       console.log(`~ 2. DB.task.then -> userId: ${util.inspect(userId.sfid)} ~`)
       let args = [subject, user, userId.sfid, description, recordtypeid, 'Incident', 'Slack']
@@ -57,12 +57,13 @@ module.exports.createCase = (subject, user, description) => {
       sco = obj
       sco.client.on('notification', data => {
         console.log('--> Recieved trigger data: ', data.payload)
-        return db.one(`SELECT * FROM salesforcesandbox.case WHERE sfid = '${data.payload}'`)
+        db.one(`SELECT * FROM salesforcesandbox.case WHERE sfid = '${data.payload}'`)
         .then(data => {
           console.log(`~ 4. case retrieved via select, data:\n${util.inspect(data)}`)
           return data
         })
       })
+      console.log(' - returning LISTEN satus - ')
       return sco.none('LISTEN status')
     })
     .catch(err => {
@@ -74,10 +75,6 @@ module.exports.createCase = (subject, user, description) => {
         sco.done()
       }
     })
-  })
-  .then(data => {
-    console.log('~ 5. final then, data:\n', util.inspect(data))
-    return Promise.resolve(data)
   })
   .catch(err => {
     console.log(err)
