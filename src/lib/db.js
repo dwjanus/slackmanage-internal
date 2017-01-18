@@ -51,7 +51,7 @@ module.exports.createCase = (subject, user, description) => {
   })
   .then(() => {
     let sco
-    db.connect()
+    return db.connect()
     .then(obj => {
       console.log(`~ 3. DB.connect.then ~`)
       sco = obj
