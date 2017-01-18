@@ -17,7 +17,7 @@ const pgConfig = {
   host: params.hostname,
   port: params.port,
   ssl: true,
-  poolIdleTimeout: 5500
+  poolIdleTimeout: 8000
 }
 const db = pgp(pgConfig)
 const recordtypeid = '01239000000EB4NAAW'
@@ -58,6 +58,10 @@ module.exports.createCase = (subject, user, description) => {
       sco.client.on('notification', data => {
         console.log('--> Recieved trigger data: ', data.payload)
         return db.one(`SELECT * FROM salesforcesandbox.case WHERE sfid = '${data.payload}'`)
+        .then(data => {
+          console.log(`~ 5. case retrieved via select, data:\n${util.inspect(data)}`)
+          return data
+        })
         // retrieveCase(data.payload).then(data => {
         //   console.log(`~ 5. retrieveCase.then, data:\n${util.inspect(data)}`)
         //   return data
