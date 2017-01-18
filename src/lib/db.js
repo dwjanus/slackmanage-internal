@@ -41,15 +41,14 @@ const createQuery = 'INSERT INTO salesforcesandbox.case(subject, ' +
 module.exports.createCase = (subject, user, description) => {
   console.log('--> createCase function')
   db.task(t => {
+    let sco = t
     console.log('~ 1. DB.task ~')
     return t.one(`SELECT sfid FROM salesforcesandbox.user WHERE name = $1`, user)
     .then(userId => {
       console.log(`~ 2. DB.task.then -> userId: ${util.inspect(userId.sfid)} ~`)
       let args = [subject, user, userId.sfid, description, recordtypeid, 'Incident', 'Slack']
-      let sco
       return t.none(createQuery, args)
       .then(() => {
-        sco = t
         sco.client.on('notification', data => {
           console.log('--> Recieved trigger data: ', data.payload)
           return t.one(`SELECT * FROM salesforcesandbox.case WHERE sfid = '${data.payload}'`)
