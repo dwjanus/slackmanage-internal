@@ -64,7 +64,7 @@ module.exports.createCase = (subject, user, description) => {
       let args = [subject, user, userId.sfid, description, recordtypeid, 'Incident', 'Slack']
       return t.none(createQuery, args)
       .then(() => {
-        retrieveCase().then(data => {
+        return retrieveCase().then(data => {
           console.log('~ 3. task.then - Retrieve Case data:\n', util.inspect(data))
           return data
         })
