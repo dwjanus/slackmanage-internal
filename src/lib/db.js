@@ -27,28 +27,30 @@ const createQuery = 'INSERT INTO salesforcesandbox.case(subject, ' +
       'values($1, $2, $3, $4, $5, $6, $7)'
 
 const retrieveCase = () => {
-  console.log('--> retrieveCase function')
-  let sco
-  return db.connect()
-  .then(obj => {
-    sco = obj
-    sco.client.on('notification', data => {
-      console.log('--> Recieved trigger data: ', data.payload)
-      return sco.one(`SELECT * FROM salesforcesandbox.case WHERE sfid = '${data.payload}'`)
-      // .then(data => {
-      //   console.log(`~ 4. case retrieved via select, data:\n${util.inspect(data)}`)
-      //   return data
-      // })
+  return new Promise((resolve, reject) => {
+    console.log('--> retrieveCase function')
+    let sco
+    db.connect()
+    .then(obj => {
+      sco = obj
+      sco.client.on('notification', data => {
+        console.log('--> Recieved trigger data: ', data.payload)
+        return sco.one(`SELECT * FROM salesforcesandbox.case WHERE sfid = '${data.payload}'`)
+        .then(data => {
+          console.log(`~ 4. case retrieved via select, data:\n${util.inspect(data)}`)
+          return resolve(data)
+        })
+      })
+      return sco.none('LISTEN status')
     })
-    return sco.none('LISTEN status')
-  })
-  .catch(err => {
-    console.log(err)
-  })
-  .finally(() => {
-    if (sco) {
-      sco.done()
-    }
+    .catch(err => {
+      reject(err)
+    })
+    .finally(() => {
+      if (sco) {
+        sco.done()
+      }
+    })
   })
 }
 
