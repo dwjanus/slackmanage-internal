@@ -29,7 +29,7 @@ const createQuery = 'INSERT INTO salesforcesandbox.case(subject, ' +
 const retrieveCase = () => {
   console.log('--> retrieveCase function')
   let sco
-  db.connect()
+  return db.connect()
   .then(obj => {
     sco = obj
     sco.client.on('notification', data => {
@@ -64,8 +64,7 @@ module.exports.createCase = (subject, user, description) => {
     })
   })
   .then(() => {
-    retrieveCase()
-    .then(data => {
+    retrieveCase().then(data => {
       console.log('~ 3. task.then - Retrieve Case data:\n', util.inspect(data))
       return data
     })
