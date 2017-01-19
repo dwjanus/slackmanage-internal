@@ -56,9 +56,6 @@ const retrieveCase = () => {
     .catch(err => {
       reject(err)
     })
-    .finally(() => {
-      if (sco) sco.done()
-    })
   })
 }
 
