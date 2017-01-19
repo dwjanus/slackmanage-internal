@@ -68,18 +68,8 @@ module.exports.createCase = (subject, user, email, description) => {
   })
 }
 
-module.exports.listenForStatus = () => {
-  return db.connect({direct: true})
-    .then(sco => {
-      console.log('Listener is awaiting closed notification...')
-      sco.client.on('notification', data => {
-        console.log('Received closed notification:', util.inspect(data.payload))
-        return data.payload
-      })
-      return sco.none('LISTEN closed')
-    })
-    .catch(error => {
-      console.log('Error:', error)
-    })
+module.exports.connect = (options) => {
+  if (options) return db.connect()
+  else return db.connect(options)
 }
 
