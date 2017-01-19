@@ -144,7 +144,7 @@ controller.hears('(.*)', ['direct_message'], (bot, message) => {
         ]
       }
       // here we would queue the listener for the status change of the case with (sfid)
-      return bot.reply(message, response)
+      bot.reply(message, response)
     })
   .catch(err => {
     console.log(err)
