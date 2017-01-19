@@ -40,6 +40,9 @@ controller.spawn({
       var total = response.members.length
       for (var i = 0; i < total; i++) {
         var member = response.members[i]
+        if (member.real_name == 'Devin Janus') {
+          console.log(util.inspect(member))
+        }
         fullTeamList.push({id: member.id, fullName: member.real_name, name: member.name, email: member.email})
       }
     }
