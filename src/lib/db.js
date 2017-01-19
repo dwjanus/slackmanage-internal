@@ -26,18 +26,18 @@ const createQuery = 'INSERT INTO salesforce.case(subject, ' +
       'description, recordtypeid, samanageesd__recordtype__c, origin) ' +
       'values($1, $2, $3, $4, $5, $6, $7)'
 
-db.connect({direct: true})
-.then(sco => {
-  console.log('Listener is awaiting closed notification...')
-  sco.client.on('notification', data => {
-    console.log('Received closed notification:', util.inspect(JSON.parse(data.payload)))
-    // return data.payload
-  })
-  return sco.none('LISTEN closed')
-})
-.catch(error => {
-  console.log('Error:', error)
-})
+// db.connect({direct: true})
+// .then(sco => {
+//   console.log('Listener is awaiting closed notification...')
+//   sco.client.on('notification', data => {
+//     console.log('Received closed notification:', util.inspect(JSON.parse(data.payload)))
+//     // return data.payload
+//   })
+//   return sco.none('LISTEN closed')
+// })
+// .catch(error => {
+//   console.log('Error:', error)
+// })
 
 const retrieveCase = () => {
   return new Promise((resolve, reject) => {
