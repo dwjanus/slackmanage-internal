@@ -43,11 +43,11 @@ const retrieveCase = () => {
   return new Promise((resolve, reject) => {
     console.log('--> retrieveCase function')
     let sco
-    return db.connect()
+    db.connect()
     .then(obj => {
       sco = obj
       sco.client.on('notification', data => {
-        console.log('--> Recieved trigger data: ', data.payload)
+        console.log('--> Recieved trigger data')
         sco.done()
         resolve(JSON.parse(data.payload))
       })
@@ -55,6 +55,9 @@ const retrieveCase = () => {
     })
     .catch(err => {
       reject(err)
+    })
+    .finally(() => {
+      if (sco) sco.done()
     })
   })
 }
