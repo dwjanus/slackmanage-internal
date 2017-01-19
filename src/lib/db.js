@@ -60,8 +60,7 @@ const retrieveCase = () => {
       sco.client.on('notification', data => {
         console.log('--> Recieved trigger data: ', data.payload)
         sco.done()
-        console.log(`~ 3. case retrieved via select, data:\n${util.inspect(data)}`)
-        resolve(data)
+        resolve(data.payload)
       })
       return sco.none('LISTEN status')
     })
