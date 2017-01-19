@@ -19,9 +19,7 @@ if (!port) {
 }
 
 const controller = Botkit.slackbot({
-  interactive_replies: true,
-  debug: false,
-  logLevel: 5
+  interactive_replies: true
 })
 
 const fullTeamList = []
