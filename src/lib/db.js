@@ -43,7 +43,7 @@ const retrieveCase = () => {
   return new Promise((resolve, reject) => {
     console.log('--> retrieveCase function')
     let sco
-    db.connect()
+    return db.connect()
     .then(obj => {
       sco = obj
       sco.client.on('notification', data => {
