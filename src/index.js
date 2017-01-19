@@ -58,7 +58,7 @@ controller.spawn({
   })
 })
 
-db.connect({direct: true})
+db.globalConnect()
 .then(sco => {
   console.log('Listener is awaiting closed notification...')
   sco.client.on('notification', data => {
@@ -159,7 +159,7 @@ controller.hears('(.*)', ['direct_message'], (bot, message) => {
         ]
       }
       // here we would queue the listener for the status change of the case with (sfid)
-      return bot.replyWithTyping(message, response)
+      return bot.reply(message, response)
     })
   .catch(err => {
     console.log(err)
