@@ -17,7 +17,6 @@ const pgConfig = {
   host: params.hostname,
   port: params.port,
   ssl: true,
-  poolSize: 20,
   poolIdleTimeout: 8000
 }
 const db = pgp(pgConfig)

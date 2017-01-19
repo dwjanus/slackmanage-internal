@@ -28,8 +28,7 @@ const fullTeamList = []
 const fullChannelList = []
 
 controller.spawn({
-  token: config('SLACK_TOKEN'),
-  send_via_rtm: true
+  token: config('SLACK_TOKEN')
 }).startRTM((err, bot) => {
   if (err) throw new Error(err)
 
@@ -132,7 +131,7 @@ controller.hears('(.*)', ['direct_message'], (bot, message) => {
   let description = `Automated incident creation for: ${user} ~ sent from Slack via HAL 9000`
   db.createCase(subject, user, email, description)
     .then(result => {
-      console.log(`~ 8. finished waiting for createCase, result:\n${util.inspect(result)}`)
+      console.log(`~ 5. finished waiting for createCase, result:\n${util.inspect(result)}`)
       let response = {
         text: `Success!`,
         attachments: [
