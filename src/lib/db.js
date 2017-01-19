@@ -26,6 +26,30 @@ const createQuery = 'INSERT INTO salesforcesandbox.case(subject, ' +
       'description, recordtypeid, samanageesd__recordtype__c, origin) ' +
       'values($1, $2, $3, $4, $5, $6, $7)'
 
+// const retrieveCase = () => {
+//   return new Promise((resolve, reject) => {
+//     console.log('--> retrieveCase function')
+//     let sco
+//     return db.connect()
+//     .then(obj => {
+//       sco = obj
+//       sco.client.on('notification', data => {
+//         console.log('--> Recieved trigger data: ', data.payload)
+//         return sco.one(`SELECT * FROM salesforcesandbox.case WHERE sfid = '${data.payload}'`)
+//         .then(data => {
+//           sco.done()
+//           console.log(`~ 3. case retrieved via select, data:\n${util.inspect(data)}`)
+//           resolve(data)
+//         })
+//       })
+//       return sco.none('LISTEN status')
+//     })
+//     .catch(err => {
+//       reject(err)
+//     })
+//   })
+// }
+
 const retrieveCase = () => {
   return new Promise((resolve, reject) => {
     console.log('--> retrieveCase function')
@@ -35,12 +59,9 @@ const retrieveCase = () => {
       sco = obj
       sco.client.on('notification', data => {
         console.log('--> Recieved trigger data: ', data.payload)
-        return sco.one(`SELECT * FROM salesforcesandbox.case WHERE sfid = '${data.payload}'`)
-        .then(data => {
-          sco.done()
-          console.log(`~ 3. case retrieved via select, data:\n${util.inspect(data)}`)
-          resolve(data)
-        })
+        sco.done()
+        console.log(`~ 3. case retrieved via select, data:\n${util.inspect(data)}`)
+        resolve(data)
       })
       return sco.none('LISTEN status')
     })
@@ -71,4 +92,19 @@ module.exports.createCase = (subject, user, email, description) => {
     console.log(err)
   })
 }
+
+// module.exports.listenForStatus = () => {
+//   return db.connect({direct: true})
+//     .then(sco => {
+//       console.log('Listener is awaiting closed notification...')
+//       sco.client.on('notification', data => {
+//         console.log('Received closed notification:', util.inspect(data))
+//         return data.payload
+//       })
+//       return sco.none('LISTEN $1~', 'closed')
+//     })
+//     .catch(error => {
+//       console.log('Error:', error)
+//     })
+// }
 

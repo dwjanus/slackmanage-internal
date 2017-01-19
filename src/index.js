@@ -5,9 +5,6 @@ import util from 'util'
 import Botkit from 'botkit'
 import config from './lib/config.js'
 import db from './lib/db.js'
-// import Promise from 'bluebird'
-
-// const createCase = Promise.promisify(db.createCase)
 
 // Simple hack to ping server every 5min and keep app running
 setInterval(() => {
