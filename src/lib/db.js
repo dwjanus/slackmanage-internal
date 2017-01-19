@@ -17,7 +17,7 @@ const pgConfig = {
   host: params.hostname,
   port: params.port,
   ssl: true,
-  poolIdleTimeout: 8000
+  poolIdleTimeout: 5000
 }
 const db = pgp(pgConfig)
 const recordtypeid = '01239000000EB4NAAW'
@@ -49,7 +49,7 @@ const retrieveCase = () => {
       sco.client.on('notification', data => {
         console.log('--> Recieved trigger data: ', data.payload)
         sco.done()
-        resolve(data.payload)
+        resolve(JSON.parse(data.payload))
       })
       return sco.none('LISTEN status')
     })
