@@ -50,11 +50,11 @@ const retrieveCase = () => {
   })
 }
 
-module.exports.createCase = (subject, user, description) => {
+module.exports.createCase = (subject, user, email, description) => {
   console.log('--> createCase function')
   return db.task(t => {
     console.log('~ 1. DB.task ~')
-    return t.one(`SELECT sfid FROM salesforcesandbox.user WHERE name = $1`, user)
+    return t.one(`SELECT sfid FROM salesforcesandbox.user WHERE name = $1 AND email = $2`, [user, email])
     .then(userId => {
       console.log(`~ 2. DB.task.then -> userId: ${util.inspect(userId.sfid)} ~`)
       let args = [subject, user, userId.sfid, description, recordtypeid, 'Incident', 'Slack']

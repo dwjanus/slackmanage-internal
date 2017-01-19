@@ -40,7 +40,7 @@ controller.spawn({
       var total = response.members.length
       for (var i = 0; i < total; i++) {
         var member = response.members[i]
-        fullTeamList.push({id: member.id, name: member.name, fullName: member.real_name})
+        fullTeamList.push({id: member.id, fullName: member.real_name, name: member.name, email: member.email})
       }
     }
   })
@@ -127,9 +127,10 @@ controller.hears('(^users$)', 'direct_message', (bot, message) => {
 // Handler for case creation
 controller.hears('(.*)', ['direct_message'], (bot, message) => {
   let user = _.find(fullTeamList, { id: message.user }).fullName
+  let email = _.find(fullTeamList, { id: message.user }).email
   let subject = message.text
   let description = `Automated incident creation for: ${user} ~ sent from Slack via HAL 9000`
-  db.createCase(subject, user, description)
+  db.createCase(subject, user, email, description)
     .then(result => {
       console.log(`~ 8. finished waiting for createCase, result:\n${util.inspect(result)}`)
       let response = {
