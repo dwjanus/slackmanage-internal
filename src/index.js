@@ -22,14 +22,16 @@ if (!port) {
 }
 
 const controller = Botkit.slackbot({
-  interactive_replies: true
+  interactive_replies: true,
+  logLevel: 7
 })
 
 const fullTeamList = []
 const fullChannelList = []
 
 controller.spawn({
-  token: config('SLACK_TOKEN')
+  token: config('SLACK_TOKEN'),
+  send_via_rtm: true
 }).startRTM((err, bot) => {
   if (err) throw new Error(err)
 
@@ -145,7 +147,7 @@ controller.hears('(.*)', ['direct_message'], (bot, message) => {
         ]
       }
       // here we would queue the listener for the status change of the case with (sfid)
-      return bot.reply(message, response)
+      return bot.replyWithTyping(message, response)
     })
   .catch(err => {
     console.log(err)
