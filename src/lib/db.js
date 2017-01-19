@@ -21,7 +21,7 @@ const pgConfig = {
 }
 const db = pgp(pgConfig)
 const recordtypeid = '01239000000EB4NAAW'
-const createQuery = 'INSERT INTO salesforcesandbox.case(subject, ' +
+const createQuery = 'INSERT INTO salesforce.case(subject, ' +
       'samanageesd__creatorname__c, samanageesd__requesteruser__c, ' +
       'description, recordtypeid, samanageesd__recordtype__c, origin) ' +
       'values($1, $2, $3, $4, $5, $6, $7)'
@@ -63,7 +63,7 @@ module.exports.createCase = (subject, user, email, description) => {
   console.log('--> createCase function')
   return db.task(t => {
     console.log('~ 1. DB.task ~')
-    return t.one(`SELECT sfid FROM salesforcesandbox.user WHERE name = $1 OR email = $2`, [user, email])
+    return t.one(`SELECT sfid FROM salesforce.user WHERE name = $1 OR email = $2`, [user, email])
     .then(userId => {
       console.log(`~ 2. DB.task.then -> userId: ${util.inspect(userId.sfid)} ~`)
       let args = [subject, user, userId.sfid, description, recordtypeid, 'Incident', 'Slack']
