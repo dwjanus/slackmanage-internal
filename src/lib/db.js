@@ -17,7 +17,7 @@ const pgConfig = {
   host: params.hostname,
   port: params.port,
   ssl: true,
-  poolIdleTimeout: 5000
+  poolIdleTimeout: 500
 }
 const db = pgp(pgConfig)
 const recordtypeid = '01239000000EB4NAAW'
@@ -43,7 +43,7 @@ const retrieveCase = () => {
   return new Promise((resolve, reject) => {
     console.log('--> retrieveCase function')
     let sco
-    return db.connect()
+    db.connect()
     .then(obj => {
       sco = obj
       sco.client.on('notification', data => {
@@ -55,9 +55,6 @@ const retrieveCase = () => {
     })
     .catch(err => {
       reject(err)
-    })
-    .finally(() => {
-      if (sco) sco.done()
     })
   })
 }
