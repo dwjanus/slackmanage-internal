@@ -58,18 +58,18 @@ controller.spawn({
   })
 })
 
-// db.globalConnect()
-// .then(sco => {
-//   console.log('Listener is awaiting closed notification...')
-//   sco.client.on('notification', data => {
-//     console.log('Received closed notification:', util.inspect(data.payload))
-//     return data.payload
-//   })
-//   return sco.none('LISTEN closed')
-// })
-// .catch(error => {
-//   console.log('Error:', error)
-// })
+db.globalConnect()
+.then(sco => {
+  console.log('Listener is awaiting closed notification...')
+  sco.client.on('notification', data => {
+    console.log('Received closed notification:', util.inspect(data.payload))
+    return data.payload
+  })
+  return sco.none('LISTEN closed')
+})
+.catch(error => {
+  console.log('Error:', error)
+})
 
 /*************************************************************************************************/
 
@@ -139,7 +139,6 @@ controller.hears('(^users$)', 'direct_message', (bot, message) => {
 
 // Handler for case creation
 controller.hears('(.*)', ['direct_message'], (bot, message) => {
-  bot.startTyping(message.channel)
   let user = _.find(fullTeamList, { id: message.user }).fullName
   let email = _.find(fullTeamList, { id: message.user }).email
   let subject = message.text

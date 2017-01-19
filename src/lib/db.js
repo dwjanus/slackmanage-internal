@@ -68,7 +68,7 @@ module.exports.createCase = (subject, user, email, description) => {
   })
 }
 
-// module.exports.globalConnect = () => {
-//   return db.connect({direct: true})
-// }
+module.exports.globalConnect = () => {
+  return db.connect({direct: true})
+}
 
