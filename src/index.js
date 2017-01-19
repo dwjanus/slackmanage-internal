@@ -58,18 +58,18 @@ controller.spawn({
   })
 })
 
-db.globalConnect()
-.then(sco => {
-  console.log('Listener is awaiting closed notification...')
-  sco.client.on('notification', data => {
-    console.log('Received closed notification:', util.inspect(data.payload))
-    return data.payload
-  })
-  return sco.none('LISTEN closed')
-})
-.catch(error => {
-  console.log('Error:', error)
-})
+// db.globalConnect()
+// .then(sco => {
+//   console.log('Listener is awaiting closed notification...')
+//   sco.client.on('notification', data => {
+//     console.log('Received closed notification:', util.inspect(data.payload))
+//     return data.payload
+//   })
+//   return sco.none('LISTEN closed')
+// })
+// .catch(error => {
+//   console.log('Error:', error)
+// })
 
 /*************************************************************************************************/
 
