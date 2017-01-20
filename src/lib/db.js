@@ -17,7 +17,7 @@ const pgConfig = {
   host: params.hostname,
   port: params.port,
   ssl: true,
-  poolIdleTimeout: 10500
+  poolIdleTimeout: 8000
 }
 const db = pgp(pgConfig)
 const recordtypeid = '01239000000EB4NAAW'
