@@ -127,7 +127,7 @@ controller.hears('(.*)', ['direct_message'], (bot, message) => {
   let email = _.find(fullTeamList, { id: message.user }).email
   let subject = message.text
   let description = `Automated incident creation for: ${user} -- ${email} ~ sent from Slack via HAL 9000`
-  db.createCase(subject, user, description)
+  db.createCase(subject, user, description) // add email to future params
     .then(result => {
       console.log(`~ 5. finished waiting for createCase, responding now`)
       let response = {
