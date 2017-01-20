@@ -24,7 +24,7 @@ const db = pgp(pgConfig)
 const recordtypeid = '01239000000EB4NAAW'
 const createQuery = 'INSERT INTO salesforce.case(subject, ' +
       'samanageesd__creatorname__c, samanageesd__requestername__c, ' +
-      'samanageesd__requesteruser__c, samnageesd__requester__c' +
+      'samanageesd__requesteruser__c, samnageesd__requester__c, ' +
       'description, recordtypeid, samanageesd__recordtype__c, origin) ' +
       'values($1, $2, $3, $4, $5, $6, $7, $8, $9)'
 
