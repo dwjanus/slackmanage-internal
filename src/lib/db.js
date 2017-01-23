@@ -24,9 +24,9 @@ const db = pgp(pgConfig)
 const recordtypeid = '01239000000EB4NAAW'
 const createQuery = 'INSERT INTO salesforce.case(subject, ' +
       'samanageesd__creatorname__c, samanageesd__requestername__c, ' +
-      'samanageesd__requesteruser__c, samanageesd__requester__c, ' +
-      'description, recordtypeid, samanageesd__recordtype__c, origin) ' +
-      'values($1, $2, $3, $4, $5, $6, $7, $8, $9)'
+      'samanageesd__requesteruser__c, description, ' +
+      'recordtypeid, samanageesd__recordtype__c, origin) ' +
+      'values($1, $2, $3, $4, $5, $6, $7, $8)'
 
 const retrieveCase = () => {
   return new Promise((resolve, reject) => {
@@ -52,14 +52,13 @@ module.exports.createCase = (subject, user, description) => { // add email param
   console.log('--> createCase function')
   return db.task(t => {
     console.log('~ 1. DB.task ~')
-    return t.one(`SELECT sfid, contactid FROM salesforce.user WHERE name = $1`, user) // AND email = $2
+    return t.one(`SELECT sfid FROM salesforce.user WHERE name = $1`, user) // AND email = $2
     .then(userIds => {
-      if (!userIds.sfid && !userIds.sfid) {
-        console.log(`SFID and ContactId not found for user: ${user}`)
-        // IF USER DOESNT EXIST THEN WE MAKE REQUESTER THE BOT -> ADD unknown user/email into sf
+      if (!userIds.sfid && !userIds.contactid) {
+        throw new Error(`SFID not found for user: ${user}`)
       } else {
-        console.log(`~ 2. DB.task.then -> userId: ${util.inspect(userIds.sfid)} - ${util.inspect(userIds.contactid)} ~`)
-        let args = [subject, user, user, userIds.sfid, userIds.contactid, description, recordtypeid, 'Incident', 'Slack']
+        console.log(`~ 2. DB.task.then -> userId: ${util.inspect(userIds.sfid)} ~`)
+        let args = [subject, user, user, userIds.sfid, description, recordtypeid, 'Incident', 'Slack']
         return t.none(createQuery, args)
         .then(() => {
           return retrieveCase().then(data => {

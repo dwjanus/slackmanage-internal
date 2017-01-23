@@ -146,6 +146,7 @@ controller.hears('(.*)', ['direct_message'], (bot, message) => {
     })
   .catch(err => {
     console.log(err)
+    return bot.reply(message, {text: err})
   })
 })
 
