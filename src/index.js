@@ -130,7 +130,10 @@ controller.hears('(.*)', ['direct_message'], (bot, message) => {
   db.createCase(subject, user, description) // add email to future params
     .then(result => {
       console.log(`~ 5. finished creating case`)
-      return bot.reply(message, {text: 'Success! Your ticket has been submitted.'})
+      return bot.reply(message, {
+        title: 'Success!',
+        title_link: 'https://goliveeap-samanagesupport.cs60.force.com/community1/s/requests',
+        text: `Your ticket for: "${subject}" has been submitted.`})
     })
   .catch(err => {
     console.log(err)
