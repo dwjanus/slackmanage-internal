@@ -18,7 +18,7 @@ const pgConfig = {
   port: params.port,
   ssl: true,
   poolSize: 20,
-  poolIdleTimeout: 8000
+  poolIdleTimeout: 2000
 }
 const db = pgp(pgConfig)
 const recordtypeid = '01239000000EB4NAAW'
@@ -27,26 +27,6 @@ const createQuery = 'INSERT INTO salesforce.case(subject, ' +
       'samanageesd__requesteruser__c, description, ' +
       'recordtypeid, samanageesd__recordtype__c, origin) ' +
       'values($1, $2, $3, $4, $5, $6, $7, $8)'
-
-const retrieveCase = () => {
-  return new Promise((resolve, reject) => {
-    console.log('--> retrieveCase function')
-    let sco
-    return db.connect()
-    .then(obj => {
-      sco = obj
-      sco.client.on('notification', data => {
-        console.log('--> Recieved trigger data')
-        sco.done()
-        resolve(JSON.parse(data.payload))
-      })
-      return sco.none('LISTEN status')
-    })
-    .catch(err => {
-      reject(err)
-    })
-  })
-}
 
 module.exports.createCase = (subject, user, description) => { // add email parameter for droduction
   console.log('--> createCase function')
@@ -60,12 +40,6 @@ module.exports.createCase = (subject, user, description) => { // add email param
         console.log(`~ 2. DB.task.then -> userId: ${util.inspect(userIds.sfid)} ~`)
         let args = [subject, user, user, userIds.sfid, description, recordtypeid, 'Incident', 'Slack']
         return t.none(createQuery, args)
-        // .then(() => {
-        //   return retrieveCase().then(data => {
-        //     console.log('~ 4. task.then - Retrieve Case data:\n', util.inspect(data))
-        //     return data
-        //   })
-        // })
       }
     })
   })
@@ -73,17 +47,3 @@ module.exports.createCase = (subject, user, description) => { // add email param
     console.log(err)
   })
 }
-
-// db.connect({direct: true})
-// .then(sco => {
-//   console.log('Listener is awaiting closed notification...')
-//   sco.client.on('notification', data => {
-//     console.log('Received closed notification:', util.inspect(JSON.parse(data.payload)))
-//     // return data.payload
-//   })
-//   return sco.none('LISTEN closed')
-// })
-// .catch(error => {
-//   console.log('Error:', error)
-// })
-
