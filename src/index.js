@@ -131,9 +131,13 @@ controller.hears('(.*)', ['direct_message'], (bot, message) => {
     .then(result => {
       console.log(`~ 5. finished creating case`)
       return bot.reply(message, {
-        title: 'Success!',
-        title_link: 'https://goliveeap-samanagesupport.cs60.force.com/community1/s/requests',
-        text: `Your ticket for: "${subject}" has been submitted.`})
+        attachments: [
+          {
+            title: 'Success!',
+            title_link: 'https://goliveeap-samanagesupport.cs60.force.com/community1/s/requests',
+            text: `Your ticket for: "${subject}" has been submitted.`
+          }
+        ]
     })
   .catch(err => {
     console.log(err)
