@@ -129,15 +129,17 @@ controller.hears('(.*)', ['direct_message'], (bot, message) => {
   let description = `Automated incident creation for: ${user} -- ${email} ~ sent from Slack via HAL 9000`
   db.createCase(subject, user, description) // add email to future params
     .then(result => {
-      console.log(`~ 5. finished creating case`)
+      console.log(`~ 5. finished creating case:\n${util.inspect(result)}`)
       let attachments = [
-          {
-            title: 'Service Request:',
-            title_link: 'https://goliveeap-samanagesupport.cs60.force.com/community1/s/requests',
-            text: `"${subject}"`
-          }
-        ]
-      return bot.reply(message, {text: 'Success!', attachments: attachments})
+        {
+          title: 'Service Request Submitted:',
+          title_link: 'https://goliveeap-samanagesupport.cs60.force.com/community1/s/requests',
+          text: `${subject}`,
+          color: '#0067B3'
+        }
+      ]
+      return bot.reply(message, {text: 'Success!', attachments})
+    })
   .catch(err => {
     console.log(err)
     return bot.reply(message, {text: err})
