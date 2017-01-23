@@ -129,20 +129,21 @@ controller.hears('(.*)', ['direct_message'], (bot, message) => {
   let description = `Automated incident creation for: ${user} -- ${email} ~ sent from Slack via HAL 9000`
   db.createCase(subject, user, description) // add email to future params
     .then(result => {
-      console.log(`~ 5. finished waiting for createCase, responding now`)
-      let response = {
-        text: `Success!`,
-        attachments: [
-          {
-            title: `Case: ${result.casenumber}`,
-            title_link: `https://cs60.salesforce.com./apex/SamanageESD__Incident?id=${result.sfid}`,
-            text: `${result.subject}`,
-            color: '#0067B3'
-          }
-        ]
-      }
-      // here we would queue the listener for the status change of the case with (sfid)
-      return bot.reply(message, response)
+      console.log(`~ 5. finished creating case`)
+      return bot.reply(message, {text: 'Success! Your ticket has been submitted.'})
+    //   let response = {
+    //     text: `Success!`,
+    //     attachments: [
+    //       {
+    //         title: `Case: ${result.casenumber}`,
+    //         title_link: `https://cs60.salesforce.com./apex/SamanageESD__Incident?id=${result.sfid}`,
+    //         text: `${result.subject}`,
+    //         color: '#0067B3'
+    //       }
+    //     ]
+    //   }
+    //   // here we would queue the listener for the status change of the case with (sfid)
+    //   return bot.reply(message, response)
     })
   .catch(err => {
     console.log(err)

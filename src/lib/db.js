@@ -54,18 +54,18 @@ module.exports.createCase = (subject, user, description) => { // add email param
     console.log('~ 1. DB.task ~')
     return t.one(`SELECT sfid FROM salesforce.user WHERE name = $1`, user) // AND email = $2
     .then(userIds => {
-      if (!userIds.sfid && !userIds.contactid) {
+      if (!userIds.sfid) {
         throw new Error(`SFID not found for user: ${user}`)
       } else {
         console.log(`~ 2. DB.task.then -> userId: ${util.inspect(userIds.sfid)} ~`)
         let args = [subject, user, user, userIds.sfid, description, recordtypeid, 'Incident', 'Slack']
         return t.none(createQuery, args)
-        .then(() => {
-          return retrieveCase().then(data => {
-            console.log('~ 4. task.then - Retrieve Case data:\n', util.inspect(data))
-            return data
-          })
-        })
+        // .then(() => {
+        //   return retrieveCase().then(data => {
+        //     console.log('~ 4. task.then - Retrieve Case data:\n', util.inspect(data))
+        //     return data
+        //   })
+        // })
       }
     })
   })
