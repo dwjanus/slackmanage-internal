@@ -127,32 +127,15 @@ controller.hears('(.*)', ['direct_message'], (bot, message) => {
   let email = _.find(fullTeamList, { id: message.user }).email
   let subject = message.text
   let description = `Automated incident creation for: ${user} -- ${email} ~ sent from Slack via HAL 9000`
-  if (user != 'Devin Janus') {
-    console.log('Got that webhook back:\n' + util.inspect(message))
-  } else {
-    db.createCase(subject, user, description) // add email to future params
-      .then(result => {
-        console.log(`~ 5. finished creating case`)
-        return bot.reply(message, {text: 'Success! Your ticket has been submitted.'})
-      //   let response = {
-      //     text: `Success!`,
-      //     attachments: [
-      //       {
-      //         title: `Case: ${result.casenumber}`,
-      //         title_link: `https://cs60.salesforce.com./apex/SamanageESD__Incident?id=${result.sfid}`,
-      //         text: `${result.subject}`,
-      //         color: '#0067B3'
-      //       }
-      //     ]
-      //   }
-      //   // here we would queue the listener for the status change of the case with (sfid)
-      //   return bot.reply(message, response)
-      })
-    .catch(err => {
-      console.log(err)
-      return bot.reply(message, {text: err})
+  db.createCase(subject, user, description) // add email to future params
+    .then(result => {
+      console.log(`~ 5. finished creating case`)
+      return bot.reply(message, {text: 'Success! Your ticket has been submitted.'})
     })
-  }
+  .catch(err => {
+    console.log(err)
+    return bot.reply(message, {text: err})
+  })
 })
 
 // Handler for interractive message buttons
