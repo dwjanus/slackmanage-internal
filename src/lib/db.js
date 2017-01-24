@@ -1,7 +1,6 @@
 
 import Promise from 'bluebird'
 import url from 'url'
-import util from 'util'
 import config from './config.js'
 let pgp = require('pg-promise')({
   promiseLib: Promise
@@ -28,16 +27,13 @@ const createQuery = 'INSERT INTO salesforce.case(subject, ' +
       'recordtypeid, samanageesd__recordtype__c, origin) ' +
       'values($1, $2, $3, $4, $5, $6, $7, $8)'
 
-module.exports.createCase = (subject, user, description) => { // add email parameter for droduction
-  console.log('--> createCase function')
+module.exports.createCase = (subject, user, email, description) => { // add email parameter for production
   return db.task(t => {
-    console.log('~ 1. DB.task ~')
-    return t.one(`SELECT sfid FROM salesforce.user WHERE name = $1`, user) // AND email = $2
+    return t.one(`SELECT sfid FROM salesforce.user WHERE name = $1 OR email = $2`, [user, email])
     .then(userIds => {
       if (!userIds.sfid) {
-        throw new Error(`SFID not found for user: ${user}`)
+        throw new Error(`SFID not found for user: ${user} ~ email: ${email}`)
       } else {
-        console.log(`~ 2. DB.task.then -> userId: ${util.inspect(userIds.sfid)} ~`)
         let args = [subject, user, user, userIds.sfid, description, recordtypeid, 'Incident', 'Slack']
         return t.none(createQuery, args)
       }

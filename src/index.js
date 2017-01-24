@@ -14,7 +14,7 @@ setInterval(() => {
 const port = process.env.PORT || process.env.port || config('PORT')
 
 if (!port) {
-  console.log('Error: Specify port in environment')
+  console.log('Error: Port not specified in environment')
   process.exit(1)
 }
 
@@ -105,18 +105,14 @@ controller.hears('^stop', 'direct_message', (bot, message) => {
   bot.rtm.close()
 })
 
-controller.hears('(^hello$)', 'direct_message', (bot, message) => {
-  let userTest = _.find(fullTeamList, { id: message.user }).fullName
-  console.log('User Test: ' + util.inspect(userTest))
-  bot.reply(message, 'Hello')
-})
-
 controller.hears('(^channels$)', 'direct_message', (bot, message) => {
-  bot.reply(message, _.toString(util.inspect(fullChannelList)))
+  let user = _.find(fullTeamList, { id: message.user }).fullName
+  if (user === 'Devin Janus') bot.reply(message, _.toString(util.inspect(fullChannelList)))
 })
 
 controller.hears('(^users$)', 'direct_message', (bot, message) => {
-  bot.reply(message, _.toString(util.inspect(fullTeamList)))
+  let user = _.find(fullTeamList, { id: message.user }).fullName
+  if (user === 'Devin Janus') bot.reply(message, _.toString(util.inspect(fullTeamList)))
 })
 
 // ~ ~ * ~ ~ ~ * * ~ ~ ~ ~ * * * ~ ~ ~ ~ ~ * * * ~ ~ ~ ~ * * ~ ~ ~ * * ~ ~ ~ * * ~ ~ ~ * ~ ~ ~ * ~ ~ * ~ ~ //
@@ -127,9 +123,8 @@ controller.hears('(.*)', ['direct_message'], (bot, message) => {
   let email = _.find(fullTeamList, { id: message.user }).email
   let subject = message.text
   let description = `Automated incident creation for: ${user} -- ${email} ~ sent from Slack via HAL 9000`
-  db.createCase(subject, user, description) // add email to future params
+  db.createCase(subject, user, email, description)
     .then(result => {
-      console.log(`~ 5. finished creating case ~`)
       let attachments = [
         {
           title: 'Service Request Submitted:',
