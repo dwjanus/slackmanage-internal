@@ -29,7 +29,7 @@ const createQuery = 'INSERT INTO salesforce.case(subject, ' +
 
 module.exports.createCase = (subject, user, email, description) => { // add email parameter for production
   return db.task(t => {
-    return t.one(`SELECT sfid FROM salesforce.user WHERE name = $1 OR email = $2`, [user, email])
+    return t.one(`SELECT sfid FROM salesforce.user WHERE name = $1 AND email = $2`, [user, email])
     .then(userIds => {
       if (!userIds.sfid) {
         throw new Error(`SFID not found for user: ${user} ~ email: ${email}`)

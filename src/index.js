@@ -105,12 +105,12 @@ controller.hears('^stop', 'direct_message', (bot, message) => {
 
 controller.hears('(^channels$)', 'direct_message', (bot, message) => {
   let user = _.find(fullTeamList, { id: message.user }).fullName
-  if (user === 'Devin Janus') bot.reply(message, _.toString(util.inspect(fullChannelList)))
+  if (user === 'Devin Janus' || 'Justin Jeffries') bot.reply(message, _.toString(util.inspect(fullChannelList)))
 })
 
 controller.hears('(^users$)', 'direct_message', (bot, message) => {
   let user = _.find(fullTeamList, { id: message.user }).fullName
-  if (user === 'Devin Janus') bot.reply(message, _.toString(util.inspect(fullTeamList)))
+  if (user === 'Devin Janus' || 'Justin Jeffries') bot.reply(message, _.toString(util.inspect(fullTeamList)))
 })
 
 // ~ ~ * ~ ~ ~ * * ~ ~ ~ ~ * * * ~ ~ ~ ~ ~ * * * ~ ~ ~ ~ * * ~ ~ ~ * * ~ ~ ~ * * ~ ~ ~ * ~ ~ ~ * ~ ~ * ~ ~ //

@@ -9,7 +9,7 @@ const config = {
   PORT: process.env.PORT,
   PROXY_URI: process.env.PROXY_URI,
   SLACK_TOKEN: process.env.SLACK_TOKEN,
-  DATABASE_URL: process.env.DATABASE_URL
+  DATABASE_URL: process.env.HEROKU_POSTGRESQL_COBALT_URL
 }
 
 export default (key) => {
