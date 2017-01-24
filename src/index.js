@@ -73,16 +73,14 @@ controller.hears(['(^help$)'], ['direct_message', 'direct_mention'], (bot, messa
     {
       title: 'Usage',
       color: '#0067B3',
-      text: 'Simply direct mention (@hal) in any channel you have invited ' +
-            'the bot to, or send a direct message to: HAL 9000. Any message ' +
-            'sent to Hal will automatically be submitted as an internal ticket ' +
-            'with the entire message body as the case subject.',
+      text: 'Simply direct message Hal 9000 to submit your request. Any message ' +
+            'sent to Hal will automatically be created as an internal support ticket ' +
+            'on your behalf, with the [entire] message body as the subject.',
       fields: [
         {
-          title: 'Example', // maybe make this a gif or jpg?
-          value: 'User: @hal: I need help with my keyboard\n' +
-                 'HAL 9000: Your ticket for: \"I need help with my keyboard\" ' +
-                 'has been submitted!',
+          title: 'Example',
+          value: 'User: I need help with my keyboard\n' +
+                 'HAL 9000: Service Request Submitted:\nI need help with my keyboard',
           short: false
         }
       ],
@@ -92,7 +90,7 @@ controller.hears(['(^help$)'], ['direct_message', 'direct_mention'], (bot, messa
 
   let replyWithAttachments = {
     pretext: 'Samanage bot help',
-    text: 'Samanage bot automates ticket creation for the Samanage Internal Service Desk.',
+    text: 'Hal 9000 automates ticket creation for the Samanage Internal Service Desk.',
     attachments,
     mrkdown_in: ['text', 'pretext']
   }
