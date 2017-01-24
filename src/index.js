@@ -129,11 +129,11 @@ controller.hears('(.*)', ['direct_message'], (bot, message) => {
   let description = `Automated incident creation for: ${user} -- ${email} ~ sent from Slack via HAL 9000`
   db.createCase(subject, user, description) // add email to future params
     .then(result => {
-      console.log(`~ 5. finished creating case:\n${util.inspect(result)}`)
+      console.log(`~ 5. finished creating case ~`)
       let attachments = [
         {
           title: 'Service Request Submitted:',
-          title_link: 'https://goliveeap-samanagesupport.cs60.force.com/community1/s/requests',
+          title_link: 'https://samanagesupport.force.com/Samanage/s/requests',
           text: `${subject}`,
           color: '#0067B3'
         }
