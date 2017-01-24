@@ -1,8 +1,11 @@
 
-import Pool from 'pg-pool'
-import util from 'util'
+import Promise from 'bluebird'
 import url from 'url'
+import util from 'util'
 import config from './config.js'
+let pgp = require('pg-promise')({
+  promiseLib: Promise
+})
 
 // config for pool
 const params = url.parse(config('DATABASE_URL'))
@@ -10,47 +13,37 @@ const auth = params.auth.split(':')
 const pgConfig = {
   user: auth[0],
   password: auth[1],
+  database: params.pathname.split('/')[1],
   host: params.hostname,
   port: params.port,
-  database: params.pathname.split('/')[1],
-  max: 20,
   ssl: true,
-  idleTimeoutMillis: 2000 // 2s idle timeout for clients
+  poolSize: 20,
+  poolIdleTimeout: 2000
 }
-const pool = new Pool(pgConfig)
+const db = pgp(pgConfig)
+const recordtypeid = '01239000000EB4NAAW'
+const createQuery = 'INSERT INTO salesforce.case(subject, ' +
+      'samanageesd__creatorname__c, samanageesd__requestername__c, ' +
+      'samanageesd__requesteruser__c, description, ' +
+      'recordtypeid, samanageesd__recordtype__c, origin) ' +
+      'values($1, $2, $3, $4, $5, $6, $7, $8)'
 
-module.exports.createCase = (subject, user, description, cb) => {
-  let recordtypeid = '01239000000EB4NAAW'
-  let createQuery = 'INSERT INTO salesforcesandbox.case(subject, ' +
-    'creatorname, samanageesd__creatorname__c, samanageesd__requestername__c, ' +
-    'description, recordtypeid, samanageesd__recordtype__c, origin) ' +
-    'values($1, $2, $3, $4, $5, $6, $7, $8);'
-  let args = [subject, user, user, user, description, recordtypeid, 'Incident', 'Slack']
-  pool.query(createQuery, args)
-  console.log('~ Case created ~')
-  pool.connect().then(client => {
-    client.query('LISTEN status')
-    client.on('notification', data => {
-      console.log('-- notification fired, data.payload:\n', data.payload)
-      client.release()
-      console.log('-- client released, calling back results --')
-      cb(null, data.payload)
-    })
-    .catch(err => {
-      client.release()
-      cb(err, null)
+module.exports.createCase = (subject, user, description) => { // add email parameter for droduction
+  console.log('--> createCase function')
+  return db.task(t => {
+    console.log('~ 1. DB.task ~')
+    return t.one(`SELECT sfid FROM salesforce.user WHERE name = $1`, user) // AND email = $2
+    .then(userIds => {
+      if (!userIds.sfid) {
+        throw new Error(`SFID not found for user: ${user}`)
+      } else {
+        console.log(`~ 2. DB.task.then -> userId: ${util.inspect(userIds.sfid)} ~`)
+        let args = [subject, user, user, userIds.sfid, description, recordtypeid, 'Incident', 'Slack']
+        return t.none(createQuery, args)
+      }
     })
   })
-}
-
-module.exports.retrieveCase = (sfid, cb) => {
-  let retrieveQuery = `SELECT * FROM salesforcesandbox.case WHERE sfid = '${sfid}'`
-  pool.query(retrieveQuery, [], (err, result) => {
-    if (err) {
-      cb(err, null)
-      return
-    }
-    console.log('Retrieve Case result:\n', util.inspect(result))
-    cb(null, result.rows[0])
+  .catch(err => {
+    console.log(err)
   })
 }

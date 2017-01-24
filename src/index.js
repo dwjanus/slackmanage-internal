@@ -1,10 +1,10 @@
 
-import pg from 'pg'
 import http from 'http'
+import _ from 'lodash'
 import util from 'util'
 import Botkit from 'botkit'
-import db from './lib/db.js'
 import config from './lib/config.js'
+import db from './lib/db.js'
 
 // Simple hack to ping server every 5min and keep app running
 setInterval(() => {
@@ -22,10 +22,37 @@ const controller = Botkit.slackbot({
   interactive_replies: true
 })
 
+const fullTeamList = []
+const fullChannelList = []
+
 controller.spawn({
   token: config('SLACK_TOKEN')
-}).startRTM((err) => {
+}).startRTM((err, bot) => {
   if (err) throw new Error(err)
+
+  // @ https://api.slack.com/methods/users.list
+  bot.api.users.list({}, (err, response) => {
+    if (err) console.log(err)
+    if (response.hasOwnProperty('members') && response.ok) {
+      var total = response.members.length
+      for (var i = 0; i < total; i++) {
+        var member = response.members[i]
+        fullTeamList.push({id: member.id, fullName: member.real_name, name: member.name, email: member.profile.email})
+      }
+    }
+  })
+
+  // @ https://api.slack.com/methods/channels.list
+  bot.api.channels.list({}, (err, response) => {
+    if (err) console.log(err)
+    if (response.hasOwnProperty('channels') && response.ok) {
+      var total = response.channels.length
+      for (var i = 0; i < total; i++) {
+        var channel = response.channels[i]
+        fullChannelList.push({id: channel.id, name: channel.name})
+      }
+    }
+  })
 })
 
 /*************************************************************************************************/
@@ -78,37 +105,44 @@ controller.hears('^stop', 'direct_message', (bot, message) => {
   bot.rtm.close()
 })
 
+controller.hears('(^hello$)', 'direct_message', (bot, message) => {
+  let userTest = _.find(fullTeamList, { id: message.user }).fullName
+  console.log('User Test: ' + util.inspect(userTest))
+  bot.reply(message, 'Hello')
+})
+
+controller.hears('(^channels$)', 'direct_message', (bot, message) => {
+  bot.reply(message, _.toString(util.inspect(fullChannelList)))
+})
+
+controller.hears('(^users$)', 'direct_message', (bot, message) => {
+  bot.reply(message, _.toString(util.inspect(fullTeamList)))
+})
+
 // ~ ~ * ~ ~ ~ * * ~ ~ ~ ~ * * * ~ ~ ~ ~ ~ * * * ~ ~ ~ ~ * * ~ ~ ~ * * ~ ~ ~ * * ~ ~ ~ * ~ ~ ~ * ~ ~ * ~ ~ //
 
 // Handler for case creation
 controller.hears('(.*)', ['direct_message'], (bot, message) => {
-  bot.api.users.info({user: message.user}, (err, res) => {
-    if (err) console.log(err)
-    let subject = message.text
-    let user = res.user.profile.real_name
-    let description = `Automated incident creation via HAL9000 slackbot for: ${res.user.profile.real_name} ~ Slack Id: ${message.user}`
-
-    db.createCase(subject, user, description, (err, res) => {
-      if (err) console.log(err)
-      console.log('--> Create Case response: ', util.inspect(res))
-      bot.reply(message, {text: 'Creating your case now...'})
-      db.retrieveCase(res, (err, result) => {
-        if (err) console.log(err)
-        console.log('App-level Retrieval result: ' + util.inspect(result))
-        bot.reply(message, {
-          text: `Success!`,
-          attachments: [
-            {
-              title: `Case: ${result.casenumber}`,
-              title_link: `https://cs60.salesforce.com./apex/SamanageESD__Incident?id=${result.sfid}`,
-              text: `${result.subject}`,
-              color: '#0067B3'
-            }
-          ]
-        })
-        console.log('~ create case finished ~')
-      })
+  let user = _.find(fullTeamList, { id: message.user }).fullName
+  let email = _.find(fullTeamList, { id: message.user }).email
+  let subject = message.text
+  let description = `Automated incident creation for: ${user} -- ${email} ~ sent from Slack via HAL 9000`
+  db.createCase(subject, user, description) // add email to future params
+    .then(result => {
+      console.log(`~ 5. finished creating case ~`)
+      let attachments = [
+        {
+          title: 'Service Request Submitted:',
+          title_link: 'https://samanagesupport.force.com/Samanage/s/requests',
+          text: `${subject}`,
+          color: '#0067B3'
+        }
+      ]
+      return bot.reply(message, {text: 'Success!', attachments})
     })
+  .catch(err => {
+    console.log(err)
+    return bot.reply(message, {text: err})
   })
 })
 
@@ -126,3 +160,4 @@ controller.on('rtm_close', bot => {
   console.log('** The RTM api just closed')
   // may want to attempt to re-open
 })
+
