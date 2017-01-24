@@ -100,7 +100,7 @@ controller.setupWebserver(port, (err, webserver) => {
   })
 
   webserver.get('/success', (req, res) => {
-    res.send('Success! Karma bot has been added to your team')
+    res.send('Success! Hal has been added to your team')
   })
 })
 
@@ -118,8 +118,8 @@ controller.on('create_bot', (bot, config) => {
         if (err) {
           console.log(err)
         } else {
-          convo.say('I am a bot that has just joined your team')
-          convo.say('You must now /invite me to a channel so that I can be of use!')
+          convo.say('Howdy! I am the bot that has just joined your team.')
+          convo.say('All you gotta do is send me messages now')
         }
       })
     })
