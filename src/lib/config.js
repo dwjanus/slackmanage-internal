@@ -8,7 +8,9 @@ const config = {
   ENV: process.env.NODE_ENV,
   PORT: process.env.PORT,
   PROXY_URI: process.env.PROXY_URI,
-  SLACK_TOKEN: process.env.SLACK_TOKEN,
+  SLACK_CLIENT_ID: process.env.SLACK_CLIENT_ID,
+  SLACK_CLIENT_SECRET: process.env.SLACK_CLIENT_SECRET,
+  MONGODB_URI: process.env.MONGODB_URI,
   DATABASE_URL: process.env.HEROKU_POSTGRESQL_COBALT_URL
 }
 
