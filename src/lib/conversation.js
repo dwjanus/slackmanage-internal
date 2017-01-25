@@ -22,8 +22,7 @@ export default (controller, bot) => {
                    'HAL 9000: Service Request Submitted:\nI need help with my keyboard',
             short: false
           }
-        ],
-        mrkdown_in: ['text', 'pretext']
+        ]
       }
     ]
 

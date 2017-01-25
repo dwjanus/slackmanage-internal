@@ -3,11 +3,11 @@ import http from 'http'
 import Botkit from 'botkit'
 import mongo from 'botkit-storage-mongo'
 import config from './lib/config.js'
-import conversation from './lib/conversation.js'
+import Conversation from './lib/conversation.js'
 
 // Simple hack to ping server every 5min and keep app running
 setInterval(() => {
-  http.get('http://slackmanage-internal.herokuapp.com')
+  http.get('http://slackmanage-internal-sandbox.herokuapp.com')
 }, 300000)
 
 const mongoStorage = mongo({mongoUri: config('MONGODB_URI')})
@@ -48,7 +48,7 @@ controller.storage.teams.all((err, teams) => {
       const bot = controller.spawn(teams[t]).startRTM(err => {
         if (err) throw new Error('Error connecting bot to Slack:', err)
         else {
-          const convo = conversation(controller, bot)
+          const convo = new Conversation(controller, bot)
           trackConvo(bot, convo)
           convo.getUserEmailArray(bot)
         }
@@ -68,7 +68,7 @@ controller.on('create_bot', (bot, config) => {
           trackBot(bot)
           _convos[bot.config.token].getUserEmailArray(bot)
         } else {
-          const convo = conversation(controller, bot)
+          const convo = new Conversation(controller, bot)
           trackConvo(bot, convo)
           convo.getUserEmailArray(bot)
         }
@@ -102,12 +102,12 @@ controller.setupWebserver(port, (err, webserver) => {
   controller.createWebhookEndpoints(controller.webserver)
   controller.createOauthEndpoints(controller.webserver, (err, req, res) => {
     if (err) res.status(500).send(`ERROR: ${err}`)
-    else res.redirect('https://slackmanage-internal.herokuapp.com/success')
+    else res.redirect('https://slackmanage-internal-sandbox.herokuapp.com/success')
   })
 
   webserver.get('/', (req, res) => {
     res.send('<a href="https://slack.com/oauth/authorize?scope=incoming-webhook,' +
-      'commands,bot&client_id=64177576980.131980542050"><img alt="Add to Slack" ' +
+      'commands,bot&client_id=64177576980.133263707447"><img alt="Add to Slack" ' +
       'height="40" width="139" src="https://platform.slack-edge.com/img/add_to_slack.png" ' +
       'srcset="https://platform.slack-edge.com/img/add_to_slack.png 1x,' +
       'https://platform.slack-edge.com/img/add_to_slack@2x.png 2x" /></a>')
