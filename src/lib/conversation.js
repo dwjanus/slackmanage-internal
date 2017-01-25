@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import util from 'util'
-import db from './ldb.js'
+import db from './db.js'
 // import ApiAi from '../config/middleware-apiai.js'
 
 export default (controller, bot) => {
