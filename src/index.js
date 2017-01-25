@@ -3,6 +3,7 @@ import http from 'http'
 import _ from 'lodash'
 import util from 'util'
 import Botkit from 'botkit'
+import mongo from 'botkit-storage-mongo'
 import config from './lib/config.js'
 import db from './lib/db.js'
 
@@ -11,6 +12,7 @@ setInterval(() => {
   http.get('http://slackmanage-internal.herokuapp.com')
 }, 300000)
 
+const mongoStorage = mongo({mongoUri: config('MONGODB_URI')})
 const port = process.env.PORT || process.env.port || config('PORT')
 
 if (!port) {
@@ -19,17 +21,18 @@ if (!port) {
 }
 
 const controller = Botkit.slackbot({
-  interactive_replies: true
+  interactive_replies: true,
+  storage: mongoStorage
+}).configureSlackApp({
+  clientId: config('SLACK_CLIENT_ID'),
+  clientSecret: config('SLACK_CLIENT_SECRET'),
+  scopes: ['bot', 'incoming-webhook', 'commands']
 })
 
 const fullTeamList = []
 const fullChannelList = []
 
-controller.spawn({
-  token: config('SLACK_TOKEN')
-}).startRTM((err, bot) => {
-  if (err) throw new Error(err)
-
+function getUserEmailArray (bot) {
   // @ https://api.slack.com/methods/users.list
   bot.api.users.list({}, (err, response) => {
     if (err) console.log(err)
@@ -53,6 +56,29 @@ controller.spawn({
       }
     }
   })
+}
+const _bots = {}
+
+function trackBot (bot) {
+  _bots[bot.config.token] = bot
+}
+
+controller.storage.teams.all((err, teams) => {
+  console.log('** connecting teams **\n')
+  if (err) {
+    throw new Error(err)
+  }
+  for (const t in teams) {
+    if (teams[t].bot) {
+      const bot = controller.spawn(teams[t]).startRTM(err => {
+        if (err) throw new Error('Error connecting bot to Slack:', err)
+        else {
+          trackBot(bot)
+          getUserEmailArray(bot)
+        }
+      })
+    }
+  }
 })
 
 /*************************************************************************************************/
@@ -60,10 +86,54 @@ controller.spawn({
 controller.setupWebserver(port, (err, webserver) => {
   if (err) console.log(err)
   controller.createWebhookEndpoints(controller.webserver)
+  controller.createOauthEndpoints(controller.webserver, (err, req, res) => {
+    if (err) res.status(500).send(`ERROR: ${err}`)
+    else res.redirect('https://slackmanage-internal.herokuapp.com/success')
+  })
 
   webserver.get('/', (req, res) => {
-    res.send('Whuttr Yu Doin Hur??')
+    res.send('<a href="https://slack.com/oauth/authorize?scope=incoming-webhook,' +
+      'commands,bot&client_id=64177576980.131980542050"><img alt="Add to Slack" ' +
+      'height="40" width="139" src="https://platform.slack-edge.com/img/add_to_slack.png" ' +
+      'srcset="https://platform.slack-edge.com/img/add_to_slack.png 1x,' +
+      'https://platform.slack-edge.com/img/add_to_slack@2x.png 2x" /></a>')
   })
+
+  webserver.get('/success', (req, res) => {
+    res.send('Success! Hal has been added to your team')
+  })
+})
+
+// quick greeting/create convo on new bot creation
+controller.on('create_bot', (bot, config) => {
+  console.log('** bot is being created **\n')
+  if (_bots[bot.config.token]) { // do nothing
+  } else {
+    bot.startRTM(err => {
+      if (!err) {
+        trackBot(bot)
+        getUserEmailArray(bot)
+      }
+      bot.startPrivateConversation({user: config.createdBy}, (err, convo) => {
+        if (err) {
+          console.log(err)
+        } else {
+          convo.say('Howdy! I am the bot that has just joined your team.')
+          convo.say('All you gotta do is send me messages now')
+        }
+      })
+    })
+  }
+})
+
+// Handle events related to the websocket connection to Slack
+controller.on('rtm_open', bot => {
+  console.log('** The RTM api just connected!')
+})
+
+controller.on('rtm_close', bot => {
+  console.log('** The RTM api just closed')
+  // may want to attempt to re-open
 })
 
 /*************************************************************************************************/
@@ -119,8 +189,8 @@ controller.hears('(^users$)', 'direct_message', (bot, message) => {
 controller.hears('(.*)', ['direct_message'], (bot, message) => {
   let user = _.find(fullTeamList, { id: message.user }).fullName
   let email = _.find(fullTeamList, { id: message.user }).email
-  let subject = message.text
-  let description = `Automated incident creation for: ${user} -- ${email} ~ sent from Slack via HAL 9000`
+  let subject = _.truncate(message.text)
+  let description = `${message.text}\n\nAutomated incident creation for: ${user} -- ${email} ~ sent from Slack via HAL 9000`
   db.createCase(subject, user, email, description)
     .then(result => {
       let attachments = [
@@ -142,15 +212,5 @@ controller.hears('(.*)', ['direct_message'], (bot, message) => {
 // Handler for interractive message buttons
 controller.on('interactive_message_callback', (bot, message) => {
   console.log(`** interractive message callback ${message.callback_id} recieved **`)
-})
-
-// Handle events related to the websocket connection to Slack
-controller.on('rtm_open', bot => {
-  console.log('** The RTM api just connected!')
-})
-
-controller.on('rtm_close', bot => {
-  console.log('** The RTM api just closed')
-  // may want to attempt to re-open
 })
 
