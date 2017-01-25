@@ -189,8 +189,8 @@ controller.hears('(^users$)', 'direct_message', (bot, message) => {
 controller.hears('(.*)', ['direct_message'], (bot, message) => {
   let user = _.find(fullTeamList, { id: message.user }).fullName
   let email = _.find(fullTeamList, { id: message.user }).email
-  let subject = message.text
-  let description = `Automated incident creation for: ${user} -- ${email} ~ sent from Slack via HAL 9000`
+  let subject = _.truncate(message.text)
+  let description = `${message.text}\n\nAutomated incident creation for: ${user} -- ${email} ~ sent from Slack via HAL 9000`
   db.createCase(subject, user, email, description)
     .then(result => {
       let attachments = [
