@@ -1,11 +1,9 @@
 
 import http from 'http'
-import _ from 'lodash'
-import util from 'util'
 import Botkit from 'botkit'
 import mongo from 'botkit-storage-mongo'
 import config from './lib/config.js'
-import db from './lib/db.js'
+import conversation from './lib/conversation.js'
 
 // Simple hack to ping server every 5min and keep app running
 setInterval(() => {
@@ -29,38 +27,15 @@ const controller = Botkit.slackbot({
   scopes: ['bot', 'incoming-webhook', 'commands']
 })
 
-const fullTeamList = []
-const fullChannelList = []
-
-function getUserEmailArray (bot) {
-  // @ https://api.slack.com/methods/users.list
-  bot.api.users.list({}, (err, response) => {
-    if (err) console.log(err)
-    if (response.hasOwnProperty('members') && response.ok) {
-      var total = response.members.length
-      for (var i = 0; i < total; i++) {
-        var member = response.members[i]
-        fullTeamList.push({id: member.id, fullName: member.real_name, name: member.name, email: member.profile.email})
-      }
-    }
-  })
-
-  // @ https://api.slack.com/methods/channels.list
-  bot.api.channels.list({}, (err, response) => {
-    if (err) console.log(err)
-    if (response.hasOwnProperty('channels') && response.ok) {
-      var total = response.channels.length
-      for (var i = 0; i < total; i++) {
-        var channel = response.channels[i]
-        fullChannelList.push({id: channel.id, name: channel.name})
-      }
-    }
-  })
-}
 const _bots = {}
-
 function trackBot (bot) {
   _bots[bot.config.token] = bot
+}
+
+const _convos = {}
+function trackConvo (bot, convo) {
+  _convos[bot.config.token] = convo
+  trackBot(bot)
 }
 
 controller.storage.teams.all((err, teams) => {
@@ -73,12 +48,51 @@ controller.storage.teams.all((err, teams) => {
       const bot = controller.spawn(teams[t]).startRTM(err => {
         if (err) throw new Error('Error connecting bot to Slack:', err)
         else {
-          trackBot(bot)
-          getUserEmailArray(bot)
+          const convo = conversation(controller, bot)
+          trackConvo(bot, convo)
+          convo.getUserEmailArray(bot)
         }
       })
     }
   }
+})
+
+// quick greeting/create convo on new bot creation
+controller.on('create_bot', (bot, config) => {
+  console.log('** bot is being created **\n')
+  if (_bots[bot.config.token]) { // do nothing
+  } else {
+    bot.startRTM(err => {
+      if (!err) {
+        if (_convos[bot.config.token]) {
+          trackBot(bot)
+          _convos[bot.config.token].getUserEmailArray(bot)
+        } else {
+          const convo = conversation(controller, bot)
+          trackConvo(bot, convo)
+          convo.getUserEmailArray(bot)
+        }
+      }
+      bot.startPrivateConversation({user: config.createdBy}, (err, convo) => {
+        if (err) {
+          console.log(err)
+        } else {
+          convo.say('Howdy! I am the bot that you just added to your team.')
+          convo.say('All you gotta do is send me messages now')
+        }
+      })
+    })
+  }
+})
+
+// Handle events related to the websocket connection to Slack
+controller.on('rtm_open', bot => {
+  console.log('** The RTM api just connected!')
+})
+
+controller.on('rtm_close', bot => {
+  console.log('** The RTM api just closed')
+  // may want to attempt to re-open
 })
 
 /*************************************************************************************************/
@@ -103,114 +117,3 @@ controller.setupWebserver(port, (err, webserver) => {
     res.send('Success! Hal has been added to your team')
   })
 })
-
-// quick greeting/create convo on new bot creation
-controller.on('create_bot', (bot, config) => {
-  console.log('** bot is being created **\n')
-  if (_bots[bot.config.token]) { // do nothing
-  } else {
-    bot.startRTM(err => {
-      if (!err) {
-        trackBot(bot)
-        getUserEmailArray(bot)
-      }
-      bot.startPrivateConversation({user: config.createdBy}, (err, convo) => {
-        if (err) {
-          console.log(err)
-        } else {
-          convo.say('Howdy! I am the bot that has just joined your team.')
-          convo.say('All you gotta do is send me messages now')
-        }
-      })
-    })
-  }
-})
-
-// Handle events related to the websocket connection to Slack
-controller.on('rtm_open', bot => {
-  console.log('** The RTM api just connected!')
-})
-
-controller.on('rtm_close', bot => {
-  console.log('** The RTM api just closed')
-  // may want to attempt to re-open
-})
-
-/*************************************************************************************************/
-
-controller.hears(['(^help$)'], ['direct_message', 'direct_mention'], (bot, message) => {
-  let attachments = [
-    {
-      title: 'Usage',
-      color: '#0067B3',
-      text: 'Simply direct message Hal 9000 to submit your request. Any message ' +
-            'sent to Hal will automatically be created as an internal support ticket ' +
-            'on your behalf, with the [entire] message body as the subject.',
-      fields: [
-        {
-          title: 'Example',
-          value: 'User: I need help with my keyboard\n' +
-                 'HAL 9000: Service Request Submitted:\nI need help with my keyboard',
-          short: false
-        }
-      ],
-      mrkdown_in: ['text', 'pretext']
-    }
-  ]
-
-  let replyWithAttachments = {
-    pretext: 'Samanage bot help',
-    text: 'Hal 9000 automates ticket creation for the Samanage Internal Service Desk.',
-    attachments,
-    mrkdown_in: ['text', 'pretext']
-  }
-
-  bot.reply(message, replyWithAttachments)
-})
-
-controller.hears('^stop', 'direct_message', (bot, message) => {
-  bot.reply(message, 'Goodbye')
-  bot.rtm.close()
-})
-
-controller.hears('(^channels$)', 'direct_message', (bot, message) => {
-  let user = _.find(fullTeamList, { id: message.user }).fullName
-  if (user === 'Devin Janus' || 'Justin Jeffries') bot.reply(message, _.toString(util.inspect(fullChannelList)))
-})
-
-controller.hears('(^users$)', 'direct_message', (bot, message) => {
-  let user = _.find(fullTeamList, { id: message.user }).fullName
-  if (user === 'Devin Janus' || 'Justin Jeffries') bot.reply(message, _.toString(util.inspect(fullTeamList)))
-})
-
-// ~ ~ * ~ ~ ~ * * ~ ~ ~ ~ * * * ~ ~ ~ ~ ~ * * * ~ ~ ~ ~ * * ~ ~ ~ * * ~ ~ ~ * * ~ ~ ~ * ~ ~ ~ * ~ ~ * ~ ~ //
-
-// Handler for case creation
-controller.hears('(.*)', ['direct_message'], (bot, message) => {
-  let user = _.find(fullTeamList, { id: message.user }).fullName
-  let email = _.find(fullTeamList, { id: message.user }).email
-  let subject = _.truncate(message.text)
-  let description = `${message.text}\n\nAutomated incident creation for: ${user} -- ${email} ~ sent from Slack via HAL 9000`
-  db.createCase(subject, user, email, description)
-    .then(result => {
-      let attachments = [
-        {
-          title: 'Service Request Submitted:',
-          title_link: 'https://samanagesupport.force.com/Samanage/s/requests',
-          text: `${subject}`,
-          color: '#0067B3'
-        }
-      ]
-      return bot.reply(message, {text: 'Success!', attachments})
-    })
-  .catch(err => {
-    console.log(err)
-    return bot.reply(message, {text: err})
-  })
-})
-
-// Handler for interractive message buttons
-controller.on('interactive_message_callback', (bot, message) => {
-  console.log(`** interractive message callback ${message.callback_id} recieved **`)
-})
-

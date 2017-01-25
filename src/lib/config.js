@@ -11,7 +11,7 @@ const config = {
   SLACK_CLIENT_ID: process.env.SLACK_CLIENT_ID,
   SLACK_CLIENT_SECRET: process.env.SLACK_CLIENT_SECRET,
   MONGODB_URI: process.env.MONGODB_URI,
-  DATABASE_URL: process.env.HEROKU_POSTGRESQL_COBALT_URL
+  DATABASE_URL: process.env.DATABASE_URL
 }
 
 export default (key) => {
