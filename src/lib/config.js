@@ -12,7 +12,7 @@ const config = {
   SLACK_CLIENT_SECRET: process.env.SLACK_CLIENT_SECRET,
   MONGODB_URI: process.env.MONGODB_URI,
   DATABASE_URL: process.env.DATABASE_URL,
-  APIAI_TOKEN: process.env.APIAI_TOKEN
+  APIAI_DEV_TOKEN: process.env.APIAI_DEV_TOKEN
 }
 
 export default (key) => {

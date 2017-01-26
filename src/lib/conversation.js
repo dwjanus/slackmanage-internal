@@ -7,7 +7,7 @@ import ApiAi from './middleware-apiai.js'
 export default (controller, bot) => {
   const fullTeamList = []
   const fullChannelList = []
-  const apiai = ApiAi({token: config('APIAI_TOKEN')})
+  const apiai = ApiAi({token: config('APIAI_DEV_TOKEN')})
 
   controller.middleware.receive.use(apiai.receive)
 
