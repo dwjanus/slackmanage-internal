@@ -1,11 +1,15 @@
 import _ from 'lodash'
 import util from 'util'
 import db from './db.js'
-// import ApiAi from '../config/middleware-apiai.js'
+import config from './config.js'
+import ApiAi from './middleware-apiai.js'
 
 export default (controller, bot) => {
   const fullTeamList = []
   const fullChannelList = []
+  const apiai = ApiAi({token: config('APIAI_TOKEN')})
+
+  controller.middleware.receive.use(apiai.receive)
 
   controller.hears(['(^help$)'], ['direct_message', 'direct_mention'], (bot, message) => {
     let attachments = [
@@ -51,30 +55,54 @@ export default (controller, bot) => {
     if (user === 'Devin Janus' || 'Justin Jeffries') bot.reply(message, _.toString(util.inspect(fullTeamList)))
   })
 
+  controller.hears([undefined], ['direct_message'], apiai.hears, (bot, message) => {
+    let nlpReply = {
+      fallback: '~ NLP response Error ~',
+      text: message.fulfillment.speech,
+      color: '#0067B3',
+      mrkdown_in: ['text', 'pretext']
+    }
+
+    bot.reply(message, nlpReply)
+  })
+
   // ~ ~ * ~ ~ ~ * * ~ ~ ~ ~ * * * ~ ~ ~ ~ ~ * * * ~ ~ ~ ~ * * ~ ~ ~ * * ~ ~ ~ * * ~ ~ ~ * ~ ~ ~ * ~ ~ * ~ ~ //
 
   // Handler for case creation
-  controller.hears('(.*)', ['direct_message'], (bot, message) => {
-    let user = _.find(fullTeamList, { id: message.user }).fullName
-    let email = _.find(fullTeamList, { id: message.user }).email
-    let subject = _.truncate(message.text)
-    let description = `${message.text}\n\nAutomated incident creation for: ${user} -- ${email} ~ sent from Slack via HAL 9000`
-    db.createCase(subject, user, email, description)
-      .then(result => {
-        let attachments = [
-          {
-            title: 'Service Request Submitted:',
-            title_link: 'https://samanagesupport.force.com/Samanage/s/requests',
-            text: `${subject}`,
-            color: '#0067B3'
-          }
-        ]
-        return bot.reply(message, {text: 'Success!', attachments})
+  controller.hears('service request', ['direct_message'], apiai.hears, (bot, message) => {
+    if (message.nlpResponse.result.action === 'createRequest') {
+      console.log('--> Intent heard: Service Request')
+      console.log('--> message looks like:\n' + util.inspect(message))
+      console.log('--> nlp looks like:\n' + util.inspect(message.nlpResponse.result))
+      let user = _.find(fullTeamList, { id: message.user }).fullName
+      let email = _.find(fullTeamList, { id: message.user }).email
+      // let user = 'Devin Janus' // change this once we know where the variable lives
+      // let email = 'devin.janus@example.com' // same here as above
+      let longSubject = message.entities[subject].value
+      let subject = _.truncate(longSubject)
+      if (longSubject.length <= 0) {
+        console.log('- No subject found! -')
+      } else {
+        console.log(`- Subject found: ${longSubject} -`)
+      }
+      let description = `${longSubject}\n\nAutomated incident creation for: ${user} -- ${email} ~ sent from Slack via HAL 9000`
+      db.createRequest(subject, user, email, description)
+        .then(result => {
+          let attachments = [
+            {
+              title: 'Service Request Submitted:',
+              title_link: 'https://samanagesupport.force.com/Samanage/s/requests',
+              text: `${subject}`,
+              color: '#0067B3'
+            }
+          ]
+          return bot.reply(message, {text: 'Success!', attachments})
+        })
+      .catch(err => {
+        console.log(err)
+        return bot.reply(message, {text: err})
       })
-    .catch(err => {
-      console.log(err)
-      return bot.reply(message, {text: err})
-    })
+    }
   })
 
   // Handler for interractive message buttons
@@ -84,7 +112,6 @@ export default (controller, bot) => {
 
   return {
     getUserEmailArray (bot) {
-      // @ https://api.slack.com/methods/users.list
       bot.api.users.list({}, (err, response) => {
         if (err) console.log(err)
         if (response.hasOwnProperty('members') && response.ok) {
@@ -96,7 +123,6 @@ export default (controller, bot) => {
         }
       })
 
-      // @ https://api.slack.com/methods/channels.list
       bot.api.channels.list({}, (err, response) => {
         if (err) console.log(err)
         if (response.hasOwnProperty('channels') && response.ok) {

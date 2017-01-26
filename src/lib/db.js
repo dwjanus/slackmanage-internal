@@ -27,7 +27,7 @@ const createQuery = 'INSERT INTO salesforce.case(subject, ' +
       'recordtypeid, samanageesd__recordtype__c, origin) ' +
       'values($1, $2, $3, $4, $5, $6, $7, $8)'
 
-module.exports.createCase = (subject, user, email, description) => {
+module.exports.createRequest = (subject, user, email, description) => {
   return db.task(t => {
     return t.one(`SELECT sfid FROM salesforce.user WHERE name = $1`, user)
     .then(userIds => {

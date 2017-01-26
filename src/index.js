@@ -116,4 +116,36 @@ controller.setupWebserver(port, (err, webserver) => {
   webserver.get('/success', (req, res) => {
     res.send('Success! Hal has been added to your team')
   })
+
+  webserver.post('/webhook', (req, res) => {
+    console.log(' ** webhook request received **\n')
+    try {
+      let speech = 'empty speech'
+      if (req.body) {
+        console.log(' --> request passed')
+        let requestBody = req.body
+        if (requestBody.result) {
+          speech = ''
+          if (requestBody.result.fulfillment) {
+            speech += requestBody.result.fulfillment.speech + ' '
+          }
+        }
+      }
+      console.log(' --> result: ', speech)
+      return res.json({
+        speech: speech,
+        displayText: speech,
+        source: 'slackmanage-internal-sandbox'
+      })
+    } catch (err) {
+      console.error('ERROR: Cant process request -> ', err)
+
+      return res.status(400).json({
+        status: {
+          code: 400,
+          errorType: err.message
+        }
+      })
+    }
+  })
 })
