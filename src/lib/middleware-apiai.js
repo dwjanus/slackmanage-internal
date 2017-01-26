@@ -6,7 +6,7 @@ export default (config) => {
   if (!config.token) {
     throw new Error('Error: No api.ai token provided!')
   } if (!config.minimum_confidence) {
-    config.minimum_confidence = 0.5
+    config.minimum_confidence = 0.4
   }
 
   var apiai = apiaiService(config.token)

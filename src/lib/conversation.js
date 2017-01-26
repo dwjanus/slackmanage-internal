@@ -69,23 +69,17 @@ export default (controller, bot) => {
   // ~ ~ * ~ ~ ~ * * ~ ~ ~ ~ * * * ~ ~ ~ ~ ~ * * * ~ ~ ~ ~ * * ~ ~ ~ * * ~ ~ ~ * * ~ ~ ~ * ~ ~ ~ * ~ ~ * ~ ~ //
 
   // Handler for case creation
-  controller.hears('service request', ['direct_message'], apiai.hears, (bot, message) => {
+  controller.hears(['service request'], ['direct_message'], apiai.hears, (bot, message) => {
     if (message.nlpResponse.result.action === 'createRequest') {
       console.log('--> Intent heard: Service Request')
       console.log('--> message looks like:\n' + util.inspect(message))
       console.log('--> nlp looks like:\n' + util.inspect(message.nlpResponse.result))
       let user = _.find(fullTeamList, { id: message.user }).fullName
       let email = _.find(fullTeamList, { id: message.user }).email
-      // let user = 'Devin Janus' // change this once we know where the variable lives
-      // let email = 'devin.janus@example.com' // same here as above
-      let longSubject = message.entities[subject].value
-      let subject = _.truncate(longSubject)
-      if (longSubject.length <= 0) {
-        console.log('- No subject found! -')
-      } else {
-        console.log(`- Subject found: ${longSubject} -`)
-      }
-      let description = `${longSubject}\n\nAutomated incident creation for: ${user} -- ${email} ~ sent from Slack via HAL 9000`
+      let subject = _.truncate(message.text)
+      let description = `${message.text}\n\nAutomated incident creation for: ${user} -- ${email} ~ sent from Slack via HAL 9000`
+      let quick = {'text': message.fulfillment.speech}
+      bot.say(quick)
       db.createRequest(subject, user, email, description)
         .then(result => {
           let attachments = [
