@@ -78,8 +78,6 @@ export default (controller, bot) => {
       let email = _.find(fullTeamList, { id: message.user }).email
       let subject = _.truncate(message.text)
       let description = `${message.text}\n\nAutomated incident creation for: ${user} -- ${email} ~ sent from Slack via HAL 9000`
-      let quick = {'text': message.fulfillment.speech}
-      bot.say(quick)
       db.createRequest(subject, user, email, description)
         .then(result => {
           let attachments = [
@@ -90,7 +88,7 @@ export default (controller, bot) => {
               color: '#0067B3'
             }
           ]
-          return bot.reply(message, {text: 'Success!', attachments})
+          return bot.reply(message, {text: message.fulfillment.speech, attachments})
         })
       .catch(err => {
         console.log(err)
