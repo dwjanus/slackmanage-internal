@@ -58,7 +58,7 @@ export default (controller, bot) => {
   controller.hears([undefined], ['direct_message'], apiai.hears, (bot, message) => {
     let nlpReply = {
       fallback: '~ NLP response Error ~',
-      text: message.fulfillment.speech,
+      text: message.fulfillment.displayText,
       color: '#0067B3',
       mrkdown_in: ['text', 'pretext']
     }
@@ -88,7 +88,7 @@ export default (controller, bot) => {
               color: '#0067B3'
             }
           ]
-          return bot.reply(message, {text: message.fulfillment.speech, attachments})
+          return bot.reply(message, {text: message.fulfillment.displayText, attachments})
         })
       .catch(err => {
         console.log(err)
