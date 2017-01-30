@@ -8,7 +8,7 @@ import Conversation from './lib/conversation.js'
 
 // Simple hack to ping server every 5min and keep app running
 setInterval(() => {
-  http.get('http://slackmanage-internal.herokuapp.com')
+  http.get('http://slackmanage.herokuapp.com')
 }, 300000)
 
 const mongoStorage = mongo({mongoUri: config('MONGODB_URI')})
@@ -29,7 +29,7 @@ const controller = Botkit.slackbot({
 }).configureSlackApp({
   clientId: config('SLACK_CLIENT_ID'),
   clientSecret: config('SLACK_CLIENT_SECRET'),
-  redirectUri: 'https://slackmanage-internal.herokuapp.com/oauth',
+  redirectUri: 'https://slackmanage.herokuapp.com/oauth',
   scopes: ['bot', 'incoming-webhook', 'commands']
 })
 
@@ -38,7 +38,7 @@ controller.setupWebserver(port, (err, webserver) => {
   controller.createWebhookEndpoints(controller.webserver)
   controller.createOauthEndpoints(controller.webserver, (err, req, res) => {
     if (err) res.status(500).send(`ERROR: ${err}`)
-    else res.redirect('https://slackmanage-internal.herokuapp.com/success')
+    else res.redirect('https://slackmanage.herokuapp.com/success')
   })
 
   webserver.get('/', (req, res) => {
@@ -59,7 +59,7 @@ controller.setupWebserver(port, (err, webserver) => {
   const oauth2 = new jsforce.OAuth2({
     clientId: config('SF_CLIENT_ID'),
     clientSecret: config('SF_CLIENT_SECRET'),
-    redirectUri: 'https://slackmanage-internal.herokuapp.com/oauth2/authorize'
+    redirectUri: 'https://slackmanage.herokuapp.com/oauth2/authorize'
   })
 
   webserver.get('/oauth2/authorize', (req, res) => {
@@ -105,7 +105,7 @@ controller.setupWebserver(port, (err, webserver) => {
       return res.json({
         speech: speech,
         displayText: speech,
-        source: 'slackmanage-internal'
+        source: 'slackmanage'
       })
     } catch (err) {
       console.error('ERROR: Cant process request - ', err)

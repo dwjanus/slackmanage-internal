@@ -8,10 +8,9 @@ const config = {
   ENV: process.env.NODE_ENV,
   PORT: process.env.PORT,
   PROXY_URI: process.env.PROXY_URI,
-  SLACK_CLIENT_ID: process.env.SLACK_CLIENT_ID,
-  SLACK_CLIENT_SECRET: process.env.SLACK_CLIENT_SECRET,
+  SLACK_CLIENT_ID: process.env.CLIENT_ID,
+  SLACK_CLIENT_SECRET: process.env.CLIENT_SECRET,
   MONGODB_URI: process.env.MONGODB_URI,
-  DATABASE_URL: process.env.DATABASE_URL,
   APIAI_DEV_TOKEN: process.env.APIAI_DEV_TOKEN
 }
 
