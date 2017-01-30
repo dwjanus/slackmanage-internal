@@ -1,12 +1,61 @@
 import _ from 'lodash'
 import util from 'util'
-import db from './db.js'
+import Salesforce from './salesforce.js'
 import config from './config.js'
 import ApiAi from './middleware-apiai.js'
 
-export default (controller, bot) => {
+Array.prototype.addCommentButtons = function (comments) {
+  for (let c = 0; c < comments.length; c++) {
+    for (let i = 0; i < this.length; i++) {
+      if (this[i].pretext === ('Case: ' + comments[c].case_number)) {
+        this[i]['fallback'] = 'Comments'
+        this[i]['callback_id'] = `commentsBTN_${comments[c].id}_${comments[c].case_number}`
+        this[i]['attachment_type'] = 'default'
+        this[i]['actions'] = [{
+          name: 'View',
+          text: 'View Comments',
+          type: 'button'
+        }]
+      }
+    }
+  }
+}
+
+// const setAttachmentColorForCase = function (Case) {
+//   let color = '#18a6fb' // new
+//   if (Case.Status === 'Working') color = '#f37ef4'
+//   if (Case.Status === 'Awaiting Input') color = '#f7a084'
+//   if (Case.Status === 'On Hold') color = '#829dba'
+//   if (Case.Status === 'Escalated') color = '#6284f4'
+//   if (Case.Status === 'Closed') color = '#a7b8d1'
+//   if (Case.Status === 'Approved') color = '#33a95d'
+//   if (Case.Status === 'Declined') color = '#a90101'
+//   if (Case.Status === 'Resolved') color = '#31b95d'
+//   return color
+// }
+
+export default (controller, bot, teamId) => {
   const fullTeamList = []
   const fullChannelList = []
+  let salesforce
+  connectToSF()
+
+  function connectToSF () {
+    controller.storage.teams.get(teamId, (err, team) => {
+      if (err) console.log(err)
+      let salesforceWrapper = Salesforce(team.org.tokens.sfInstanceUrl, team.org.tokens.sfAccessToken, team.org.sfRefreshToken)
+      salesforce = salesforceWrapper.salesforce
+
+      if (salesforceWrapper.refresh) {
+        console.log('** refresh token passed with constructor ... updating storage now **')
+        team.org.tokens.sfAccessToken = salesforceWrapper.refresh
+        controller.storage.sfAuth.save(team.orgs)
+        controller.storage.teams.save(team)
+        console.log(' --> updated sfAuth stored for future connection\n')
+      }
+    })
+  }
+
   const apiai = ApiAi({token: config('APIAI_DEV_TOKEN')})
 
   controller.middleware.receive.use(apiai.receive)
@@ -78,7 +127,7 @@ export default (controller, bot) => {
       let email = _.find(fullTeamList, { id: message.user }).email
       let subject = _.truncate(message.text)
       let description = `${message.text}\n\nAutomated incident creation for: ${user} -- ${email} ~ sent from Slack via HAL 9000`
-      db.createRequest(subject, user, email, description)
+      salesforce.createRequest(subject, user, email, description)
         .then(result => {
           let attachments = [
             {
