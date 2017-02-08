@@ -71,7 +71,7 @@ controller.storage.teams.all((err, teams) => {
   for (const t in teams) {
     if (teams[t].bot) {
       const bot = controller.spawn(teams[t]).startRTM(err => {
-        if (err) throw new Error('Error connecting bot to Slack:', err)
+        if (err) throw new Error('Error connecting bot to Slack')
         else {
           trackBot(bot)
           getUserEmailArray(bot)
@@ -100,7 +100,7 @@ controller.setupWebserver(port, (err, webserver) => {
   })
 
   webserver.get('/success', (req, res) => {
-    res.send('Success! Hal has been added to your team')
+    res.send('Success! Sam has been added to your team')
   })
 })
 
@@ -160,7 +160,7 @@ controller.hears(['(^help$)'], ['direct_message', 'direct_mention'], (bot, messa
 
   let replyWithAttachments = {
     pretext: 'Samanage bot help',
-    text: 'Hal 9000 automates ticket creation for the Samanage Internal Service Desk.',
+    text: 'Sam automates ticket creation for the Samanage Internal Service Desk.',
     attachments,
     mrkdown_in: ['text', 'pretext']
   }
@@ -195,7 +195,7 @@ controller.hears('(.*)', ['direct_message'], (bot, message) => {
     .then(result => {
       let attachments = [
         {
-          title: 'Service Request Submitted:',
+          title: 'Ticket Submitted!',
           title_link: 'https://samanagesupport.force.com/Samanage/s/requests',
           text: `${subject}`,
           color: '#0067B3'
