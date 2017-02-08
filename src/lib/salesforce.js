@@ -29,7 +29,7 @@ export default (instanceUrl, accessToken, refreshToken) => {
       oauth2: {
         clientId: config('SF_CLIENT_ID'),
         clientSecret: config('SF_CLIENT_SECRET'),
-        redirectUri: 'https://slackmanage.herokuapp.com/oauth2/authorize'
+        redirectUri: 'https://slackmanage-internal.herokuapp.com/oauth2/authorize'
       },
       instanceUrl,
       accessToken,
